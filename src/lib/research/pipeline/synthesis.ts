@@ -82,7 +82,13 @@ export function validateSynthesis(output: SynthesisOutput, draft: DraftSnapshot)
   const known = new Set(draft.gaps.map((g) => g.text.toLowerCase()));
   const modelGaps = output.gaps
     .map((g) => clip(g.text, 240))
-    .filter((t) => t && !known.has(t.toLowerCase()))
+    .filter((t) => {
+      // Also skips repeats within the model's own list.
+      const key = t.toLowerCase();
+      if (!t || known.has(key)) return false;
+      known.add(key);
+      return true;
+    })
     .slice(0, 4)
     .map((text, i) => ({ code: `model_gap_${i + 1}`, text }));
   return {

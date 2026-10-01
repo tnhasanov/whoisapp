@@ -62,7 +62,9 @@ export function classifyAnthropicError(error: unknown): ProviderError | JobCance
   }
   if (error instanceof Anthropic.NotFoundError) return new ProviderError("anthropic", "bad_request", "The configured model is not available to this API key.", error.message);
   if (error instanceof Anthropic.RateLimitError) {
-    const retryAfter = Number(error.headers?.get?.("retry-after"));
+    // A missing header must not become 0 ("retry now"): Number(null) === 0.
+    const header = error.headers?.get?.("retry-after");
+    const retryAfter = header ? Number(header) : Number.NaN;
     return new ProviderError("anthropic", "rate_limited", "The model provider rate-limited the request.", error.message, Number.isFinite(retryAfter) ? retryAfter * 1000 : undefined);
   }
   if (error instanceof Anthropic.BadRequestError) return new ProviderError("anthropic", "bad_request", "The model request was rejected.", error.message);

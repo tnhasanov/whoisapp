@@ -78,6 +78,16 @@ export type ContactRejection =
  *    published it themselves (own website/profile) for professional contact.
  * 4. Only routes that reach the person are marked direct.
  */
+const GENERIC_MAILBOXES = new Set([
+  "info", "office", "reception", "contact", "contacts", "hello", "enquiries", "enquiry", "inquiries", "inquiry",
+  "admin", "mail", "general", "secretary", "secretariat", "press", "media", "pr", "news", "support", "team", "hr", "jobs", "careers",
+]);
+
+function isGenericMailbox(value: string): boolean {
+  const local = value.trim().toLowerCase().split("@")[0] ?? "";
+  return GENERIC_MAILBOXES.has(local.replace(/[._-]?\d+$/, ""));
+}
+
 export function classifyContact(input: {
   type: ContactType;
   belongsTo: ContactOwner;
@@ -105,6 +115,11 @@ export function classifyContact(input: {
   if (looksLikeReception && (type === "office_line" || type === "business_mobile" || type === "switchboard")) {
     if (belongsTo === "person") note = "Published as a reception/main line, so it is shown as an organisation number.";
     type = "switchboard";
+    belongsTo = "organisation";
+  }
+  // A shared inbox (reception@, info@ …) is the organisation's, whoever reads it.
+  if (type === "work_email" && belongsTo === "person" && (looksLikeReception || isGenericMailbox(input.value))) {
+    note = "Published as a general or reception inbox, so it is shown as an organisation address.";
     belongsTo = "organisation";
   }
   if (belongsTo === "organisation" && (type === "office_line" || type === "business_mobile")) {

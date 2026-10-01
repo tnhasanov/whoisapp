@@ -399,10 +399,12 @@ class JobRunner {
 
     const discovery = (await this.step("discover:search", "discover", false, async (): Promise<DiscoverySearchOutput> => {
       const picks: NameVariant[] = [];
+      // Up to 3 discovery searches, always leaving at least one for research.
+      const maxDiscovery = Math.max(1, Math.min(3, this.job.config.limits.maxSearchQueries - 1));
       for (const lang of ["original", "az", "ru", "en"] as const) {
         const v = lang === "original" ? normalised.variants[0] : normalised.variants.find((x) => x.language === lang && !picks.includes(x));
         if (v && !picks.includes(v)) picks.push(v);
-        if (picks.length >= 3) break;
+        if (picks.length >= maxDiscovery) break;
       }
       const context = [query.company ? `"${query.company}"` : null, query.country].filter(Boolean).join(" ");
       const outputs: DiscoverySearchOutput = { queries: [], documentKeys: [], blocked: [] };
@@ -964,8 +966,9 @@ export function buildQueryPlan(
   ];
   const plan = candidates.filter((q) => q.query.trim().length > 0);
 
-  // Respect the overall budget (discovery uses up to 3 queries).
-  const budget = Math.max(5, limits.maxSearchQueries - 3);
+  // Respect the overall budget (discovery uses up to 3 queries). A floor above 1 would
+  // overrun small budgets (e.g. 4 queries per run allowed 3 + 5).
+  const budget = Math.max(1, limits.maxSearchQueries - 3);
   if (plan.length <= budget) return plan;
   const priority: ResearchCategory[] = ["career", "news", "contacts", "accounts", "connections"];
   const selected: PlannedQuery[] = [];

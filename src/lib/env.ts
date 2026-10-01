@@ -57,10 +57,12 @@ const EnvSchema = z.object({
   ANTHROPIC_API_URL: optionalString(z.string().url()),
 
   // Hard server-side research budgets. Owner settings may only lower these.
-  RESEARCH_MAX_SEARCH_QUERIES: intInRange(1, 60, 16),
+  // Discovery uses up to 3 searches, so at least one is left for research.
+  RESEARCH_MAX_SEARCH_QUERIES: intInRange(4, 60, 16),
   RESEARCH_MAX_RESULTS_PER_QUERY: intInRange(1, 20, 6),
   RESEARCH_MAX_EXTRACT_PAGES: intInRange(0, 60, 12),
-  RESEARCH_MAX_MODEL_CALLS: intInRange(1, 40, 10),
+  // Discovery, at least one extraction batch and synthesis.
+  RESEARCH_MAX_MODEL_CALLS: intInRange(3, 40, 10),
   RESEARCH_MAX_OUTPUT_TOKENS: intInRange(1024, 64000, 16000),
   RESEARCH_MAX_SOURCE_CHARS: intInRange(2000, 200000, 24000),
   RESEARCH_PROVIDER_TIMEOUT_MS: intInRange(2000, 300000, 45000),

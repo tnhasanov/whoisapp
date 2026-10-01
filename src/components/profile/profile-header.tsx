@@ -16,6 +16,17 @@ import { Callout } from "@/components/ui/feedback";
 import { Menu, MenuItem, MenuLabel, MenuSeparator } from "@/components/ui/menu";
 import { initials } from "@/lib/names";
 
+/** Exports are attachments: a temporary link downloads them without leaving the page. */
+function download(href: string) {
+  const a = document.createElement("a");
+  a.href = href;
+  a.rel = "noopener";
+  a.download = "";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
 export function ProfileHeader() {
   const { view } = useEvidence();
   const t = useTranslations("Profile");
@@ -103,10 +114,10 @@ export function ProfileHeader() {
             }
           >
             <MenuLabel>{t("exportNotesNote")}</MenuLabel>
-            <MenuItem onSelect={() => (window.location.href = `${exportBase}&format=pdf`)}>{t("exportPdf")}</MenuItem>
-            <MenuItem onSelect={() => (window.location.href = `${exportBase}&format=json`)}>{t("exportJson")}</MenuItem>
+            <MenuItem onSelect={() => download(`${exportBase}&format=pdf`)}>{t("exportPdf")}</MenuItem>
+            <MenuItem onSelect={() => download(`${exportBase}&format=json`)}>{t("exportJson")}</MenuItem>
             <MenuSeparator />
-            <MenuItem onSelect={() => (window.location.href = `${exportBase}&format=json&notes=1`)}>{t("exportWithNotes")}</MenuItem>
+            <MenuItem onSelect={() => download(`${exportBase}&format=json&notes=1`)}>{t("exportWithNotes")}</MenuItem>
           </Menu>
           <Menu
             trigger={

@@ -177,8 +177,8 @@ export function htmlToText(html: string): string {
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;|&apos;/g, "'")
-    .replace(/&#(\d+);/g, (_, n: string) => {
-      const code = Number(n);
+    .replace(/&#(\d+);|&#x([0-9a-f]+);/gi, (_, dec: string | undefined, hex: string | undefined) => {
+      const code = dec !== undefined ? Number(dec) : Number.parseInt(hex ?? "", 16);
       return code > 31 && code < 0x110000 ? String.fromCodePoint(code) : " ";
     })
     // Last, so "&amp;lt;" decodes once to "&lt;" rather than twice to "<".

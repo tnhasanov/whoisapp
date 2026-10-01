@@ -687,7 +687,9 @@ export function assembleSnapshot(input: AssembleInput): DraftSnapshot {
       }
       if (seenMediaUrls.has(doc.canonicalUrl)) continue;
       seenMediaUrls.add(doc.canonicalUrl);
-      const published = dateInfo(m.published_date ?? sourceInfo.get(key)?.published_date);
+      // An unusable media date falls back to the page's own publication date.
+      const ownDate = dateInfo(m.published_date);
+      const published = ownDate.date ? ownDate : dateInfo(sourceInfo.get(key)?.published_date);
       mediaDrafts.push({
         sourceKey: key,
         headline: m.headline.trim(),
@@ -759,11 +761,18 @@ export function assembleSnapshot(input: AssembleInput): DraftSnapshot {
       (b.firstPublishedAt ?? "").localeCompare(a.firstPublishedAt ?? ""),
   );
   let mediaCounter = 0;
-  const stories: DraftStory[] = storiesUnranked.map((s, rank) => ({
-    ...s,
-    relevanceRank: rank,
-    items: s.items.map((i) => ({ ...i, tempId: `M${++mediaCounter}`, relevanceRank: rank })),
-  }));
+  // Story keys are unique per snapshot (DB index): ungrouped stories can share a headline and date.
+  const storyKeyCounts = new Map<string, number>();
+  const stories: DraftStory[] = storiesUnranked.map((s, rank) => {
+    const n = (storyKeyCounts.get(s.storyKey) ?? 0) + 1;
+    storyKeyCounts.set(s.storyKey, n);
+    return {
+      ...s,
+      storyKey: n === 1 ? s.storyKey : `${s.storyKey}#${n}`,
+      relevanceRank: rank,
+      items: s.items.map((i) => ({ ...i, tempId: `M${++mediaCounter}`, relevanceRank: rank })),
+    };
+  });
 
   // 7. Organisations.
   const orgs = new Map<string, DraftOrganisation>();

@@ -63,7 +63,7 @@ Never assess personality, trustworthiness, creditworthiness or hiring suitabilit
 /** Neutralise anything that could be read as our own markup. */
 export function escapeForPrompt(text: string): string {
   return text
-    .replace(/<\s*\/?\s*(documents?|subject|claims?|media|system|instructions?)\b/gi, (m) => m.replace("<", "‹"))
+    .replace(/<\s*\/?\s*(documents?|subject|claims?|media|query|system|instructions?)\b/gi, (m) => m.replace("<", "‹"))
     .replace(/\u0000/g, "");
 }
 

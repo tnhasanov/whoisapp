@@ -39,7 +39,22 @@ export function looksAzerbaijaniLatin(input: string): boolean {
   const words = input.trim().split(/\s+/);
   const surname = words[words.length - 1] ?? "";
   if (!AZ_SURNAME_SUFFIX.test(surname)) return false;
-  return words.some((w) => /^[CcQqXx][a-zəıöü]/.test(w) || /[a-z](q|x)[a-z]/i.test(w) || /[a-z]c[aeiouəı]/i.test(w));
+  return words.some((w) => /^[CcQqXx](?!h)[a-zəıöü]/.test(w) || /[a-z](q|x)[a-z]/i.test(w) || /[a-z]c[aeiouəı]/i.test(w));
+}
+
+const RU_SURNAME_SUFFIX = /(ov|ova|ev|eva|in|ina|yn|yna|sky|skiy|skaya|enko|ich|vich)$/i;
+const REGIONAL_GIVEN_NAME = /^(mammad|mamed|huseyn|guseyn|hasan|gasan|haji|hadji|javid|ali|rashid|elnar|elchin|ilham|ilgar|vugar|tural|rauf|farid|kamran|samir|nijat|nicat|orkhan|rashad|anar|aynur|leyla|lala|gunel|sevinj|sevinc|aysel|nigar|narmin|konul|ulviyya|zaur|emin|elmir|ramil|rustam|ruslan|timur|dmitr|sergey|alexey|vladimir|nikolay|olga|irina|natalya|svetlana|yelena|elena|tatyana)/i;
+
+/**
+ * True when Azerbaijani/Russian renderings are worth searching for a Latin
+ * name: a regional surname shape or given name. "John Smith" gets none, so
+ * the search budget is not spent on meaningless spellings.
+ */
+export function looksRegionalLatin(input: string): boolean {
+  if (looksAzerbaijaniLatin(input)) return true;
+  const words = input.trim().split(/\s+/);
+  const surname = words[words.length - 1] ?? "";
+  return AZ_SURNAME_SUFFIX.test(surname) || RU_SURNAME_SUFFIX.test(surname) || words.some((w) => REGIONAL_GIVEN_NAME.test(w));
 }
 
 /** Russian renderings of very common Azerbaijani name parts that do not follow letter rules. */
@@ -149,7 +164,8 @@ export function azToCyrillic(input: string): string {
     .split(/(\s+|-)/)
     .map((word) => {
       if (!word.trim() || word === "-") return word;
-      let w = applyRuNameParts(word.toLocaleLowerCase("az"));
+      // Azerbaijani casing (I → ı) only for words that are written in Azerbaijani letters.
+      let w = applyRuNameParts(AZ_SPECIFIC.test(word) ? word.toLocaleLowerCase("az") : word.toLowerCase());
       // "l" before a consonant is soft in Russian renderings (Elnara → Эльнара).
       w = w.replace(/l(?=[bcçdfgğhjkqlmnprsştvxz])/g, "lь");
       w = w.replace(/^e/, "э").replace(/^ə/, "э");
@@ -165,7 +181,7 @@ export function azToCyrillic(input: string): string {
 export function latinToCyrillic(input: string): string {
   const pairs: [RegExp, string][] = [
     [/shch/g, "щ"], [/kh/g, "х"], [/zh/g, "ж"], [/ch/g, "ч"], [/sh/g, "ш"], [/ts/g, "ц"],
-    [/ya/g, "я"], [/yu/g, "ю"], [/yo/g, "ё"], [/ye/g, "е"],
+    [/ya/g, "я"], [/yu/g, "ю"], [/yo/g, "ё"], [/ye/g, "е"], [/(?<=[aeiou])y(?![aeiou])/g, "й"],
     [/a/g, "а"], [/b/g, "б"], [/v/g, "в"], [/w/g, "в"], [/g/g, "г"], [/d/g, "д"], [/e/g, "е"], [/z/g, "з"],
     [/i/g, "и"], [/y/g, "ы"], [/j/g, "дж"], [/k/g, "к"], [/q/g, "к"], [/c/g, "к"], [/l/g, "л"], [/m/g, "м"],
     [/n/g, "н"], [/o/g, "о"], [/p/g, "п"], [/r/g, "р"], [/s/g, "с"], [/t/g, "т"], [/u/g, "у"], [/f/g, "ф"],
@@ -224,9 +240,18 @@ export function englishToAzCandidates(input: string): string[] {
 }
 
 /** Russian rendering → plausible Azerbaijani Latin (Гасымова → Qasımova). Heuristic. */
+const AZ_FROM_RU_NAME_PARTS: [RegExp, string][] = [
+  [/^Mamed/, "Məmməd"], [/^Guseyn/, "Hüseyn"], [/^Gasan/, "Həsən"], [/^Gadzhi/, "Hacı"], [/^Aliyev/, "Əliyev"], [/^Aliev/, "Əliyev"],
+];
+
 export function cyrillicToAzCandidates(input: string): string[] {
   const latin = cyrillicToLatin(input);
   const az = latin
+    .split(" ")
+    .map((w) => AZ_FROM_RU_NAME_PARTS.reduce((acc, [re, rep]) => acc.replace(re, rep), w))
+    .join(" ")
+    .replace(/Dzh/g, "C")
+    .replace(/dzh/g, "c")
     .replace(/kh/g, "x")
     .replace(/Kh/g, "X")
     .replace(/sh/g, "ş")
@@ -289,6 +314,8 @@ export function generateNameVariants(fullName: string, max = 8): NameVariant[] {
   if (name.script === "cyrillic") {
     push(core, "cyrillic", "ru", "original");
     push(cyrillicToLatin(core), "latin", "en", "transliteration");
+    // English press spelling of "дж" (Джавид → Javid).
+    push(cyrillicToLatin(core).replace(/Dzh/g, "J").replace(/dzh/g, "j"), "latin", "en", "transliteration");
     for (const az of cyrillicToAzCandidates(core)) push(az, "latin", "az", "transliteration");
   } else {
     const isAz = looksAzerbaijaniLatin(core);
@@ -297,7 +324,7 @@ export function generateNameVariants(fullName: string, max = 8): NameVariant[] {
       push(azToEnglish(core), "latin", "en", "transliteration");
       push(azToAsciiPreservingLetters(core), "latin", "en", "transliteration");
       push(azToCyrillic(core), "cyrillic", "ru", "transliteration");
-    } else {
+    } else if (looksRegionalLatin(core)) {
       const azCandidates = englishToAzCandidates(core);
       for (const az of azCandidates.slice(0, 2)) push(az, "latin", "az", "transliteration");
       push(latinToCyrillic(core), "cyrillic", "ru", "transliteration");

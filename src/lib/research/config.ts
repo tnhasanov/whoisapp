@@ -35,8 +35,9 @@ export const DEFAULT_NEWS_WINDOW_MONTHS = 60;
 
 /** Owner settings may lower but never raise the server caps. */
 export function resolveLimits(env: Env, owner: ResearchLimits | null | undefined): JobConfig["limits"] {
+  // The cap is applied last so a minimum can never lift a value above a server cap.
   const clamp = (value: number | undefined, cap: number, min = 1) =>
-    value === undefined || !Number.isFinite(value) ? cap : Math.max(min, Math.min(cap, Math.floor(value)));
+    value === undefined || !Number.isFinite(value) ? cap : Math.min(cap, Math.max(min, Math.floor(value)));
   return {
     maxSearchQueries: clamp(owner?.maxSearchQueries, env.RESEARCH_MAX_SEARCH_QUERIES, 4),
     maxResultsPerQuery: clamp(owner?.maxResultsPerQuery, env.RESEARCH_MAX_RESULTS_PER_QUERY),
