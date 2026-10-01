@@ -134,7 +134,7 @@
     "liveNotConfiguredBody": "Live research needs a Tavily API key and an Anthropic API key on the server. Until then you can explore the fictional demo workspace.",
     "switchToDemo": "Switch to demo",
     "openSettings": "View setup status",
-    "guestNote": "You are in a temporary demo workspace. Searches here only find fictional people.",
+    "guestNote": "You are in a temporary demo workspace. Searches here only find fictional people, and your demo searches, notes and saved profiles are deleted after {hours, plural, one {# hour} other {# hours}}.",
     "privacyNote": "Research uses public sources only. No one is contacted, and private or leaked data is never used.",
     "statuses": {
       "queued": "Queued",
@@ -694,7 +694,6 @@
       "refresh": "Refresh",
       "retry": "Retry"
     },
-    "open": "Open",
     "delete": "Remove from history",
     "deleteTitle": "Remove this run from history?",
     "deleteBody": "The run record, its retrieved page content and candidate list are deleted. Profiles that were already saved are not affected.",

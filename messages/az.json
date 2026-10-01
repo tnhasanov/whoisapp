@@ -134,7 +134,7 @@
     "liveNotConfiguredBody": "Canlı araşdırma üçün serverdə Tavily API açarı və Anthropic API açarı lazımdır. O vaxta qədər uydurma demo iş sahəsi ilə tanış ola bilərsiniz.",
     "switchToDemo": "Demo rejiminə keçin",
     "openSettings": "Quraşdırma vəziyyətinə baxın",
-    "guestNote": "Siz müvəqqəti demo iş sahəsindəsiniz. Buradakı axtarışlar yalnız uydurma şəxsləri tapır.",
+    "guestNote": "Siz müvəqqəti demo iş sahəsindəsiniz. Buradakı axtarışlar yalnız uydurma şəxsləri tapır; demo axtarışlarınız, qeydləriniz və saxladığınız profillər {hours, plural, one {# saatdan} other {# saatdan}} sonra silinir.",
     "privacyNote": "Araşdırmada yalnız açıq mənbələrdən istifadə olunur. Heç kimlə əlaqə saxlanılmır, məxfi və ya sızdırılmış məlumatlardan isə heç vaxt istifadə edilmir.",
     "statuses": {
       "queued": "Növbədədir",
@@ -694,7 +694,6 @@
       "refresh": "Yeniləmə",
       "retry": "Təkrar cəhd"
     },
-    "open": "Açın",
     "delete": "Tarixçədən silin",
     "deleteTitle": "Bu araşdırma tarixçədən silinsin?",
     "deleteBody": "Araşdırma yazısı, onun əldə etdiyi səhifə məzmunu və namizədlər siyahısı silinir. Artıq yadda saxlanılmış profillərə bu təsir etmir.",

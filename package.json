@@ -8,8 +8,8 @@
     "worker": "tsx src/worker/index.ts",
     "worker:dev": "tsx watch --clear-screen=false src/worker/index.ts",
     "build": "next build",
-    "start": "next start",
-    "start:all": "concurrently -k -n web,worker \"next start\" \"npm:worker\"",
+    "start": "next start -H 0.0.0.0",
+    "start:all": "concurrently -k -n web,worker \"next start -H 0.0.0.0\" \"npm:worker\"",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
@@ -20,7 +20,8 @@
     "db:migrate": "tsx scripts/migrate.ts",
     "db:migrate:test": "tsx scripts/migrate.ts --test",
     "owner:create": "tsx scripts/create-owner.ts",
-    "fixtures:check": "tsx scripts/check-fixtures.ts"
+    "fixtures:check": "tsx scripts/check-fixtures.ts",
+    "e2e:serve": "concurrently -k -n web,worker \"next start -p 3100\" \"npm:worker\""
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",

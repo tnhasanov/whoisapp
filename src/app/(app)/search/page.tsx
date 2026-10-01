@@ -14,6 +14,7 @@ import { requireViewer } from "@/lib/auth/session";
 import { recentSearches } from "@/lib/data/jobs";
 import { getDb } from "@/lib/db/client";
 import { getProviderStatus } from "@/lib/env";
+import { getEnv } from "@/lib/env";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("Meta"))("research") };
@@ -52,7 +53,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
               {t("liveNotConfiguredBody")}
             </Callout>
           ) : null}
-          {viewer.isGuest ? <Callout>{t("guestNote")}</Callout> : null}
+          {viewer.isGuest ? <Callout>{t("guestNote", { hours: getEnv().DEMO_GUEST_TTL_HOURS })}</Callout> : null}
           <Card className="p-5 sm:p-7">
             <SearchForm
               key={`${sp.name ?? ""}|${sp.company ?? ""}|${sp.profileUrl ?? ""}`}

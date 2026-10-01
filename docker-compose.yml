@@ -1,0 +1,61 @@
+# Self-hosted PersonBrief: PostgreSQL, migrations, web app and research worker.
+#   cp .env.example .env   # fill in the values (DATABASE_URL is set below)
+#   docker compose up --build -d
+#   docker compose run --rm -e OWNER_PASSWORD='…' web npm run owner:create -- --email you@example.com
+name: personbrief
+
+x-app: &app
+  build: .
+  image: personbrief:latest
+  env_file: .env
+  environment:
+    DATABASE_URL: postgres://personbrief:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/personbrief
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: personbrief
+      POSTGRES_USER: personbrief
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U personbrief -d personbrief"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  migrate:
+    <<: *app
+    command: ["npm", "run", "db:migrate"]
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    <<: *app
+    command: ["npx", "next", "start", "-H", "0.0.0.0", "-p", "3000"]
+    ports:
+      # Bound to localhost: put an HTTPS reverse proxy in front for remote access.
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    <<: *app
+    command: ["npm", "run", "worker"]
+    healthcheck:
+      disable: true
+    # Lets in-flight research finish or hand back its lease before stopping.
+    stop_grace_period: 30s
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:

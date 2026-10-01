@@ -172,12 +172,19 @@ test("Azerbaijani and Russian interface", async ({ browser }) => {
     for (const locale of ["az", "ru"] as const) {
       await setOwnerLocale(locale);
       const page = await ownerPage(browser, DESKTOP);
+      // Server and browser must render identical text (dates included), so no hydration errors.
+      const errors: string[] = [];
+      page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+      page.on("pageerror", (e) => errors.push(e.message));
       await page.goto("/search");
       await shot(page, `desktop-25-${locale}-search`);
       if (richProfileUrl) {
         await page.goto(richProfileUrl);
         await shot(page, `desktop-26-${locale}-profile-overview`);
+        await page.goto(`${richProfileUrl}/news`);
+        await page.getByRole("heading", { level: 1 }).waitFor();
       }
+      expect(errors, `console errors in ${locale}`).toEqual([]);
     }
   } finally {
     await setOwnerLocale("en");

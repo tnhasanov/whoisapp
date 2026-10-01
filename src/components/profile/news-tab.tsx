@@ -1,6 +1,7 @@
 "use client";
 
-import { Copy, Newspaper } from "lucide-react";
+import { Copy, ExternalLink, FileText, Newspaper } from "lucide-react";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { AllegationsBlock } from "@/components/evidence/evidence-drawer";
@@ -13,16 +14,18 @@ import { Input, Label, Select } from "@/components/ui/field";
 import { formatPartialDate, formatPartialDateString, parsePartialDate, partialDateEnd, partialDateStart } from "@/lib/dates/partial-date";
 import type { StoryView } from "@/lib/data/profiles";
 import type { CoverageType } from "@/lib/domain/types";
+import { displayHost, sourceHref } from "@/lib/source-links";
 
 type Filters = { language: string; topic: string; from: string; to: string; sort: "relevance" | "newest" };
 
 function StoryCard({ story }: { story: StoryView }) {
-  const { open } = useEvidence();
+  const { open, view } = useEvidence();
   const t = useTranslations("News");
   const tEv = useTranslations("Evidence");
   const locale = useLocale();
   const primary = story.items.find((i) => i.isPrimary) ?? story.items[0];
   const copies = story.items.filter((i) => i.id !== primary.id);
+  const link = sourceHref({ url: primary.url, fixtureKey: view.sources.find((src) => src.id === primary.sourceId)?.fixtureKey ?? null });
   return (
     <article className="p-4 sm:p-5">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
@@ -64,6 +67,19 @@ function StoryCard({ story }: { story: StoryView }) {
             {t("copies", { count: copies.length })}
           </Badge>
         ) : null}
+        {link.external ? (
+          <a href={link.href} target="_blank" rel="noopener noreferrer nofollow" className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline">
+            {displayHost(primary.url)}
+            <ExternalLink className="h-3 w-3" aria-hidden />
+            <span className="sr-only">{tEv("openSource")}</span>
+          </a>
+        ) : (
+          <Link href={link.href} className="ml-auto inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline">
+            <FileText className="h-3 w-3" aria-hidden />
+            {displayHost(primary.url)}
+            <span className="sr-only">{tEv("openFixture")}</span>
+          </Link>
+        )}
       </div>
       {copies.length > 0 ? (
         <div className="mt-2 text-[12.5px] text-muted">
