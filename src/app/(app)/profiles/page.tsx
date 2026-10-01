@@ -1,6 +1,6 @@
 import { BookmarkCheck, BookUser, Tag } from "lucide-react";
 import Link from "next/link";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { PageContainer, PageHeader } from "@/components/app-shell/app-shell";
 import { LibraryFilters } from "@/components/library/library-filters";
@@ -12,8 +12,11 @@ import { requireViewer } from "@/lib/auth/session";
 import { listProfiles, listTags } from "@/lib/data/profiles";
 import { getDb } from "@/lib/db/client";
 import { initials } from "@/lib/names";
+import { getDateFormat } from "@/lib/i18n/date-format-server";
 
-export const metadata = { title: "Profiles" };
+export async function generateMetadata() {
+  return { title: (await getTranslations("Meta"))("profiles") };
+}
 export const dynamic = "force-dynamic";
 
 type Params = { q?: string; sort?: string; tag?: string; scope?: string };
@@ -22,7 +25,7 @@ export default async function ProfilesPage({ searchParams }: { searchParams: Pro
   const viewer = await requireViewer();
   const sp = await searchParams;
   const t = await getTranslations("Library");
-  const format = await getFormatter();
+  const fmtDate = await getDateFormat();
   const scope = sp.scope === "saved" ? "saved" : "all";
   const sort = sp.sort === "name" || sp.sort === "researched" ? sp.sort : "recent";
   const tagId = sp.tag && /^[0-9a-f-]{36}$/i.test(sp.tag) ? sp.tag : null;
@@ -68,7 +71,7 @@ export default async function ProfilesPage({ searchParams }: { searchParams: Pro
                       </span>
                       <span className="mt-0.5 block truncate text-[13.5px] text-ink-2">{[p.headlineRole, p.headlineOrganisation].filter(Boolean).join(" · ") || "—"}</span>
                       <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-                        {p.lastResearchedAt ? <span>{t("lastResearched", { date: format.dateTime(new Date(p.lastResearchedAt), { dateStyle: "medium" }) })}</span> : null}
+                        {p.lastResearchedAt ? <span>{t("lastResearched", { date: fmtDate(p.lastResearchedAt, "date") })}</span> : null}
                         <span>{t("snapshots", { count: p.snapshotCount })}</span>
                         {p.tags.map((tg) => (
                           <span key={tg.id} className="inline-flex items-center gap-1 rounded-full bg-slate-soft px-2 py-0.5 text-[11.5px] text-ink-2">

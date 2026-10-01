@@ -202,7 +202,10 @@ export type JobConfig = {
 
 export type IdentityResolution = {
   method: IdentityResolutionMethod;
+  /** English explanation (kept for exports and older snapshots). */
   reason: string;
+  /** Values for the translated explanation (Identity.methods.*). */
+  params?: { company?: string; domains?: number };
   decidedAt: string;
 };
 

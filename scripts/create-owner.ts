@@ -26,12 +26,12 @@ async function main() {
   const email = arg("email");
   const name = arg("name") ?? "Owner";
   if (!email) throw new Error('Usage: npm run owner:create -- --email you@example.com [--name "Name"]');
-  const { createOwner } = await import("@/lib/auth/owner");
+  const { createOwner, OWNER_ERROR_TEXT } = await import("@/lib/auth/owner");
   const { closeDb } = await import("@/lib/db/client");
   const password = await readPassword();
   const result = await createOwner({ email, name, password });
   await closeDb();
-  if (!result.ok) throw new Error(result.error);
+  if (!result.ok) throw new Error(OWNER_ERROR_TEXT[result.error]);
   console.log(`Owner account created for ${email}. Sign in at ${process.env.APP_URL ?? "http://localhost:3000"}/sign-in`);
 }
 

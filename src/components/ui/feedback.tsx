@@ -1,4 +1,5 @@
 import { AlertTriangle, CircleCheck, Info, OctagonAlert } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -52,10 +53,11 @@ export function Skeleton({ className }: { className?: string }) {
 }
 
 export function Spinner({ className, label }: { className?: string; label?: string }) {
+  const t = useTranslations("Common");
   return (
     <span className={cn("inline-flex items-center gap-2", className)} role="status">
       <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden />
-      {label ? <span className="text-sm">{label}</span> : <span className="sr-only">Loading</span>}
+      {label ? <span className="text-sm">{label}</span> : <span className="sr-only">{t("loading")}</span>}
     </span>
   );
 }

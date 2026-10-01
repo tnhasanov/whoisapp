@@ -2,7 +2,7 @@
 
 import { Bookmark, BookmarkCheck, ChevronDown, Download, Flag, GitCompareArrows, MapPin, MoreHorizontal, RefreshCw, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { deleteProfileAction, toggleSaveAction } from "@/app/actions/profile";
@@ -14,7 +14,9 @@ import { Button, buttonClasses } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Callout } from "@/components/ui/feedback";
 import { Menu, MenuItem, MenuLabel, MenuSeparator } from "@/components/ui/menu";
+import { identityReason } from "@/lib/i18n/identity";
 import { initials } from "@/lib/names";
+import { useDateFormat } from "@/lib/i18n/use-date-format";
 
 /** Exports are attachments: a temporary link downloads them without leaving the page. */
 function download(href: string) {
@@ -30,7 +32,9 @@ function download(href: string) {
 export function ProfileHeader() {
   const { view } = useEvidence();
   const t = useTranslations("Profile");
-  const format = useFormatter();
+  const tCommon = useTranslations("Common");
+  const tMethods = useTranslations("Identity.methods");
+  const fmtDate = useDateFormat();
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -53,8 +57,8 @@ export function ProfileHeader() {
           <div className="min-w-0">
             <div className="label-caps mb-1 flex flex-wrap items-center gap-2">
               {t("eyebrow")}
-              {profile.workspace === "demo" ? <Badge tone="demo">Demo · fictional</Badge> : null}
-              {snapshot.status === "partial" ? <Badge tone="warn">Partial</Badge> : null}
+              {profile.workspace === "demo" ? <Badge tone="demo">{t("demoFictional")}</Badge> : null}
+              {snapshot.status === "partial" ? <Badge tone="warn">{t("partialBadge")}</Badge> : null}
             </div>
             <h1 className="font-serif text-[30px] font-semibold leading-[1.1] tracking-[-0.02em] text-ink sm:text-[36px]">{profile.displayName}</h1>
             {profile.nativeName && profile.nativeName !== profile.displayName ? <p className="mt-1 font-serif text-lg text-muted">{profile.nativeName}</p> : null}
@@ -121,7 +125,7 @@ export function ProfileHeader() {
           </Menu>
           <Menu
             trigger={
-              <button type="button" className={buttonClasses("ghost", "icon")} aria-label={t("reportIssue")}>
+              <button type="button" className={buttonClasses("ghost", "icon")} aria-label={tCommon("more")} title={tCommon("more")}>
                 <MoreHorizontal className="h-5 w-5" aria-hidden />
               </button>
             }
@@ -140,7 +144,7 @@ export function ProfileHeader() {
             title={t("deleteTitle")}
             description={t("deleteBody")}
             confirmLabel={t("deleteConfirm")}
-            cancelLabel="Cancel"
+            cancelLabel={tCommon("cancel")}
             destructive
             onConfirm={() => start(() => deleteProfileAction(profile.id))}
           />
@@ -148,7 +152,7 @@ export function ProfileHeader() {
       </div>
 
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-line py-2.5 text-[13px] text-muted">
-        <span>{t("researched", { date: format.dateTime(new Date(snapshot.researchedAt), { dateStyle: "medium", timeStyle: "short" }) })}</span>
+        <span>{t("researched", { date: fmtDate(snapshot.researchedAt, "dateTime") })}</span>
         <span aria-hidden>·</span>
         <span>{t("sourceCount", { count: snapshot.counts.sources })}</span>
         <span aria-hidden>·</span>
@@ -162,7 +166,7 @@ export function ProfileHeader() {
             {view.snapshots.map((s) => (
               <option key={s.id} value={s.id}>
                 {t("version", { version: s.version })}
-                {s.id === profile.latestSnapshotId ? ` (${t("latest")})` : ""} — {format.dateTime(new Date(s.researchedAt), { dateStyle: "short" })}
+                {s.id === profile.latestSnapshotId ? ` (${t("latest")})` : ""} — {fmtDate(s.researchedAt, "dateShort")}
               </option>
             ))}
           </select>
@@ -173,7 +177,7 @@ export function ProfileHeader() {
             {t("whatChanged")}
           </Link>
         ) : null}
-        <span className="basis-full text-xs text-subtle sm:basis-auto">{t("identityMethod", { reason: snapshot.identity.resolution.reason })}</span>
+        <span className="basis-full text-xs text-subtle sm:basis-auto">{t("identityMethod", { reason: identityReason(snapshot.identity.resolution, (k, v) => tMethods(k as never, v as never)) })}</span>
       </div>
 
       {error ? <Callout tone="danger">{error}</Callout> : null}

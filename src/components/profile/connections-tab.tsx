@@ -42,7 +42,17 @@ function RelationshipRow({ r }: { r: RelationshipView }) {
 }
 
 type GraphNode = { id: string; kind: "subject" | "person" | "org"; label: string; x: number; y: number; targetKind?: "relationship" | "organisation"; targetId?: string; aria: string };
-type GraphEdge = { id: string; from: string; to: string; documented: boolean; label: string; relationshipId: string | null };
+type GraphEdgeLabel = { text: string; relationshipId: string };
+type GraphEdge = { id: string; from: string; to: string; documented: boolean; labels: GraphEdgeLabel[]; labelAt: number };
+
+/** One node per person, even when several relationships link them to the subject. */
+function personKey(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/^(prof|dr|mr|mrs|ms)\.?\s+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 function layoutGraph(subjectName: string, rels: RelationshipView[], orgIdFor: (r: RelationshipView) => string | null, orgName: (id: string) => string): { nodes: GraphNode[]; edges: GraphEdge[] } {
   const W = 840;
@@ -51,18 +61,35 @@ function layoutGraph(subjectName: string, rels: RelationshipView[], orgIdFor: (r
   const cy = H / 2;
   const nodes: GraphNode[] = [{ id: "subject", kind: "subject", label: subjectName, x: cx, y: cy, aria: subjectName }];
   const edges: GraphEdge[] = [];
-  const documented = rels.filter((r) => r.kind === "documented");
-  const shared = rels.filter((r) => r.kind === "shared_affiliation");
+  const personNode = new Map<string, string>();
 
-  // Documented people on the upper arc.
-  documented.forEach((r, i) => {
-    const angle = Math.PI + (Math.PI * (i + 1)) / (documented.length + 1);
-    const id = `p:${r.id}`;
-    nodes.push({ id, kind: "person", label: r.counterpartName, x: cx + Math.cos(angle) * 300, y: cy + Math.sin(angle) * 190, targetKind: "relationship", targetId: r.id, aria: `${r.counterpartName}, ${r.label}` });
-    edges.push({ id: `e:${r.id}`, from: "subject", to: id, documented: true, label: r.label, relationshipId: r.id });
+  // Documented people on the upper arc, grouped by person.
+  const documented = new Map<string, RelationshipView[]>();
+  for (const r of rels.filter((x) => x.kind === "documented")) {
+    const key = personKey(r.counterpartName);
+    documented.set(key, [...(documented.get(key) ?? []), r]);
+  }
+  [...documented.entries()].forEach(([key, group], i, all) => {
+    const angle = Math.PI + (Math.PI * (i + 1)) / (all.length + 1);
+    const id = `p:${key}`;
+    const first = group[0];
+    personNode.set(key, id);
+    nodes.push({
+      id,
+      kind: "person",
+      label: first.counterpartName,
+      x: cx + Math.cos(angle) * 300,
+      y: cy + Math.sin(angle) * 190,
+      targetKind: "relationship",
+      targetId: first.id,
+      aria: `${first.counterpartName}, ${group.map((r) => r.label).join(", ")}`,
+    });
+    // Labels sit away from the crowded centre, staggered so neighbours do not overlap.
+    edges.push({ id: `e:${key}`, from: "subject", to: id, documented: true, labels: group.map((r) => ({ text: r.label, relationshipId: r.id })), labelAt: i % 2 === 0 ? 0.5 : 0.66 });
   });
 
   // Shared affiliations: organisation nodes on the lower arc, people beyond them.
+  const shared = rels.filter((r) => r.kind === "shared_affiliation");
   const orgIds = [...new Set(shared.map((r) => orgIdFor(r)).filter((x): x is string => Boolean(x)))];
   orgIds.forEach((orgId, i) => {
     const angle = (Math.PI * (i + 1)) / (orgIds.length + 1);
@@ -70,15 +97,27 @@ function layoutGraph(subjectName: string, rels: RelationshipView[], orgIdFor: (r
     const oy = cy + Math.sin(angle) * 130;
     const nodeId = `o:${orgId}`;
     nodes.push({ id: nodeId, kind: "org", label: orgName(orgId), x: ox, y: oy, targetKind: "organisation", targetId: orgId, aria: orgName(orgId) });
-    edges.push({ id: `eo:${orgId}`, from: "subject", to: nodeId, documented: false, label: "", relationshipId: null });
+    edges.push({ id: `eo:${orgId}`, from: "subject", to: nodeId, documented: false, labels: [], labelAt: 0.5 });
     const members = shared.filter((r) => orgIdFor(r) === orgId);
     members.forEach((r, j) => {
-      const spread = (j - (members.length - 1) / 2) * 0.55;
-      const px = ox + Math.cos(angle + spread) * 150;
-      const py = Math.min(H - 30, oy + Math.sin(angle + spread) * 110 + 20);
-      const pid = `sp:${r.id}`;
-      nodes.push({ id: pid, kind: "person", label: r.counterpartName, x: px, y: py, targetKind: "relationship", targetId: r.id, aria: `${r.counterpartName}, ${r.label}` });
-      edges.push({ id: `es:${r.id}`, from: nodeId, to: pid, documented: false, label: r.label, relationshipId: r.id });
+      const key = personKey(r.counterpartName);
+      let pid = personNode.get(key);
+      if (!pid) {
+        const spread = (j - (members.length - 1) / 2) * 0.55;
+        pid = `sp:${key}`;
+        personNode.set(key, pid);
+        nodes.push({
+          id: pid,
+          kind: "person",
+          label: r.counterpartName,
+          x: ox + Math.cos(angle + spread) * 150,
+          y: Math.min(H - 30, oy + Math.sin(angle + spread) * 110 + 20),
+          targetKind: "relationship",
+          targetId: r.id,
+          aria: `${r.counterpartName}, ${r.label}`,
+        });
+      }
+      edges.push({ id: `es:${r.id}`, from: nodeId, to: pid, documented: false, labels: [{ text: r.label, relationshipId: r.id }], labelAt: 0.5 });
     });
   });
   return { nodes, edges };
@@ -113,26 +152,32 @@ function ConnectionsGraph({ rels }: { rels: RelationshipView[] }) {
         {edges.map((e) => {
           const a = byId.get(e.from)!;
           const b = byId.get(e.to)!;
-          const mx = (a.x + b.x) / 2;
-          const my = (a.y + b.y) / 2;
+          const lx = a.x + (b.x - a.x) * e.labelAt;
+          const ly = a.y + (b.y - a.y) * e.labelAt;
           return (
             <g key={e.id}>
               <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} className={e.documented ? "stroke-accent" : "stroke-line-strong"} strokeWidth={e.documented ? 2 : 1.5} strokeDasharray={e.documented ? undefined : "5 5"} />
-              {e.label && e.relationshipId ? (
-                <g
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`${e.label}: ${b.label}`}
-                  className="cursor-pointer outline-none [&:focus-visible>rect]:stroke-focus [&:focus-visible>rect]:stroke-2"
-                  onClick={() => open({ kind: "relationship", id: e.relationshipId! })}
-                  onKeyDown={(ev) => onKey(ev, () => open({ kind: "relationship", id: e.relationshipId! }))}
-                >
-                  <rect x={mx - 52} y={my - 10} width={104} height={20} rx={10} className={e.documented ? "fill-accent-soft stroke-accent/40" : "fill-surface stroke-line"} />
-                  <text x={mx} y={my + 4} textAnchor="middle" className={cn("text-[10.5px] font-medium", e.documented ? "fill-accent-ink" : "fill-muted")}>
-                    {clipLabel(e.label, 18)}
-                  </text>
-                </g>
-              ) : null}
+              {e.labels.map((label, k) => {
+                const text = clipLabel(label.text, 18);
+                const width = Math.max(64, text.length * 6.4 + 18);
+                const y = ly + (k - (e.labels.length - 1) / 2) * 24;
+                return (
+                  <g
+                    key={label.relationshipId}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`${label.text}: ${b.label}`}
+                    className="cursor-pointer outline-none [&:focus-visible>rect]:stroke-focus [&:focus-visible>rect]:stroke-2"
+                    onClick={() => open({ kind: "relationship", id: label.relationshipId })}
+                    onKeyDown={(ev) => onKey(ev, () => open({ kind: "relationship", id: label.relationshipId }))}
+                  >
+                    <rect x={lx - width / 2} y={y - 10} width={width} height={20} rx={10} className={e.documented ? "fill-accent-soft stroke-accent/40" : "fill-surface stroke-line"} />
+                    <text x={lx} y={y + 4} textAnchor="middle" className={cn("text-[10.5px] font-medium", e.documented ? "fill-accent-ink" : "fill-muted")}>
+                      {text}
+                    </text>
+                  </g>
+                );
+              })}
             </g>
           );
         })}
@@ -165,7 +210,8 @@ function ConnectionsGraph({ rels }: { rels: RelationshipView[] }) {
               <text x={n.x} y={n.y + (subject ? 5 : 4)} textAnchor="middle" className={cn("font-semibold", subject ? "fill-canvas text-[14px]" : "fill-accent-ink text-[11.5px]")}>
                 {initials(n.label)}
               </text>
-              <text x={n.x} y={n.y + (subject ? 52 : 40)} textAnchor="middle" className="fill-ink-2 text-[11.5px]">
+              {/* Names sit on the far side of the node from the subject, leaving the line free for its labels. */}
+              <text x={n.x} y={subject ? n.y + 52 : n.y < 270 ? n.y - 32 : n.y + 40} textAnchor="middle" className="fill-ink-2 text-[11.5px]">
                 {clipLabel(n.label)}
               </text>
             </g>

@@ -83,7 +83,7 @@ export async function setupOwnerAction(_prev: FormState, formData: FormData): Pr
     email: String(formData.get("email") ?? ""),
     password,
   });
-  if (!result.ok) return { error: result.error };
+  if (!result.ok) return { error: t(`errors.${result.error}`) };
   try {
     await getAuth().api.signInEmail({ body: { email: String(formData.get("email")).trim().toLowerCase(), password }, headers: await headers() });
   } catch {

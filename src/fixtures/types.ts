@@ -132,6 +132,8 @@ export type FixturePersonBundle = {
 
 /** Example searches shown on the search screen. */
 export type FixtureExample = {
+  /** Message key for the translated label and scenario (Examples.<key>.*). */
+  key: string;
   label: string;
   fullName: string;
   company?: string;

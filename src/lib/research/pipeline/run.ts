@@ -547,7 +547,7 @@ class JobRunner {
           .where(and(eq(candidateIdentities.jobId, this.job.id), eq(candidateIdentities.rank, selection.rank)));
         if (candidate) {
           await withFence(this.db, this.job.id, this.rc.token, (tx) =>
-            setSelectedCandidate(tx, this.job.id, candidate.id, { method: selection.method, reason: selection.reason, decidedAt: new Date().toISOString() }),
+            setSelectedCandidate(tx, this.job.id, candidate.id, { method: selection.method, reason: selection.reason, params: selection.params, decidedAt: new Date().toISOString() }),
           );
           this.job = { ...this.job, selectedCandidateId: candidate.id };
           await this.emit({ stage: "resolve", code: "identity.auto", message: selection.reason });
@@ -570,7 +570,12 @@ class JobRunner {
       return "no_candidates";
     }
     await withFence(this.db, this.job.id, this.rc.token, (tx) => pauseForIdentity(tx, this.job.id, this.usage));
-    await this.emit({ stage: "resolve", code: "identity.awaiting", message: "Several possible matches were found. Choose the right person to continue.", data: { count: identify.candidateCount } });
+    await this.emit({
+      stage: "resolve",
+      code: "identity.awaiting",
+      message: identify.candidateCount === 1 ? "One possible match was found; please confirm the person." : "Several possible matches were found. Choose the right person to continue.",
+      data: { count: identify.candidateCount },
+    });
     return "awaiting_identity";
   }
 

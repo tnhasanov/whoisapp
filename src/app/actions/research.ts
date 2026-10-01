@@ -50,7 +50,11 @@ export async function startResearchAction(_prev: ResearchFormState, formData: Fo
     jobId = result.jobId;
   } catch (error) {
     if (error instanceof ResearchCommandError && error.fieldErrors) {
-      return { error: await messageFor(error), fieldErrors: error.fieldErrors };
+      const tFields = await getTranslations("Errors.fields");
+      const fieldErrors = Object.fromEntries(
+        Object.entries(error.fieldErrors).map(([field, code]) => [field, tFields.has(code) ? tFields(code) : tFields("invalid")]),
+      );
+      return { error: await messageFor(error), fieldErrors };
     }
     return { error: await messageFor(error) };
   }

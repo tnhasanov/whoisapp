@@ -4,16 +4,19 @@ import "@fontsource-variable/jetbrains-mono";
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { getViewer } from "@/lib/auth/session";
 
-export const metadata: Metadata = {
-  title: { default: "PersonBrief", template: "%s · PersonBrief" },
-  description: "Private professional research workspace for meeting preparation.",
-  robots: { index: false, follow: false, nocache: true },
-  referrer: "no-referrer",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Meta");
+  return {
+    title: { default: "PersonBrief", template: "%s · PersonBrief" },
+    description: t("appDescription"),
+    robots: { index: false, follow: false, nocache: true },
+    referrer: "no-referrer",
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [

@@ -285,9 +285,17 @@ describe("evidenceStatusFor", () => {
 describe("temporalFor", () => {
   it("flags a 'current' statement from a source older than 18 months", () => {
     const { temporal, uncertaintyNote } = temporalFor(claim([member("A", { currency: "stated_current" }, { sourcePublishedAt: "2023-05-01" })]), RESEARCHED_AT);
-    expect(temporal).toEqual({ start: null, end: null, currency: "stated_current", asOf: "2023-05-01", possiblyOutdated: true });
+    expect(temporal).toEqual({ start: null, end: null, currency: "stated_current", asOf: "2023-05-01", asOfBasis: "published", possiblyOutdated: true });
     expect(uncertaintyNote).toContain("2023-05-01");
     expect(uncertaintyNote).toMatch(/may no longer be accurate/);
+  });
+
+  it("marks a currency date taken from an undated page as an access date", () => {
+    const { temporal } = temporalFor(
+      claim([member("A", { currency: "stated_current" }, { sourcePublishedAt: null, sourceAccessedAt: "2026-09-30T10:00:00.000Z" })]),
+      RESEARCHED_AT,
+    );
+    expect(temporal).toMatchObject({ currency: "stated_current", asOf: "2026-09-30", asOfBasis: "accessed", possiblyOutdated: false });
   });
 
   it("uses the 18-month boundary", () => {

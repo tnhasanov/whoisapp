@@ -1,7 +1,7 @@
 "use client";
 
 import { Lock, Pencil, Plus, Tag, Trash2, X } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { addNoteAction, addTagAction, deleteNoteAction, removeTagAction, updateNoteAction } from "@/app/actions/profile";
@@ -9,12 +9,13 @@ import { useEvidence } from "@/components/evidence/evidence-context";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/field";
+import { useDateFormat } from "@/lib/i18n/use-date-format";
 
 export function NotesPanel() {
   const { view } = useEvidence();
   const t = useTranslations("Profile");
   const tCommon = useTranslations("Common");
-  const format = useFormatter();
+  const fmtDate = useDateFormat();
   const router = useRouter();
   const [pending, start] = useTransition();
   const [draft, setDraft] = useState("");
@@ -133,7 +134,7 @@ export function NotesPanel() {
               <>
                 <p className="whitespace-pre-wrap text-[13.5px] leading-relaxed text-ink">{n.body}</p>
                 <div className="mt-2 flex items-center justify-between gap-2">
-                  <span className="text-[11.5px] text-subtle">{format.dateTime(new Date(n.updatedAt), { dateStyle: "medium", timeStyle: "short" })}</span>
+                  <span className="text-[11.5px] text-subtle">{fmtDate(n.updatedAt, "dateTime")}</span>
                   <span className="flex gap-1">
                     <button
                       type="button"

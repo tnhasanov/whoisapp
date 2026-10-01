@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, SectionHeading } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/feedback";
 import { formatPartialDate, formatPartialDateString, partialDateSortKey } from "@/lib/dates/partial-date";
+import { gapText } from "@/lib/i18n/gaps";
+import { uncertaintyText } from "@/lib/i18n/uncertainty";
 import type { ClaimView } from "@/lib/data/profiles";
 import { cn } from "@/lib/utils";
 import { NotesPanel } from "./notes-panel";
@@ -50,19 +52,24 @@ function periodLabel(c: ClaimView, locale: string, t: (k: string, v?: Record<str
   if (start && c.temporal.currency === "stated_current") return `${start} – ${t("present")}`;
   if (start) return `${start} – ?`;
   if (end) return t("until", { date: end });
-  if (c.temporal.currency === "stated_current" && c.temporal.asOf) return t("asOf", { date: formatPartialDateString(c.temporal.asOf, locale) });
+  if (c.temporal.currency === "stated_current" && c.temporal.asOf) {
+    return t(c.temporal.asOfBasis === "accessed" ? "asOfAccessed" : "asOf", { date: formatPartialDateString(c.temporal.asOf, locale) });
+  }
   return t("dateUnknown");
 }
 
 /** One timeline row. Conflicting versions of the same fact render together. */
 function TimelineEntry({ claims }: { claims: ClaimView[] }) {
   const t = useTranslations("Overview");
+  const tLanguages = useTranslations("Evidence.languages");
   const tCommon = useTranslations("Common");
   const locale = useLocale();
   const primary = claims[0];
+  const tUncertainty = useTranslations("Uncertainty");
+  const uncertainty = uncertaintyText(primary.temporal, primary.uncertaintyNote, locale, (key, values) => tUncertainty(key, values));
   const conflicting = claims.length > 1 || primary.evidenceStatus === "conflicting";
   const value = primary.value;
-  const title = value.kind === "employment" ? (value.title ?? "—") : value.kind === "affiliation" ? (value.role ?? "Member") : primary.displayValue;
+  const title = value.kind === "employment" ? (value.title ?? "—") : value.kind === "affiliation" ? (value.role ?? t("memberFallback")) : primary.displayValue;
   const org = value.kind === "employment" || value.kind === "affiliation" ? value.organisation : value.kind === "education" ? value.institution : null;
   const current = primary.temporal.currency === "stated_current";
   return (
@@ -101,9 +108,13 @@ function TimelineEntry({ claims }: { claims: ClaimView[] }) {
           ) : (
             <EvidenceStatusBadge status={primary.evidenceStatus} />
           )}
-          {current && primary.temporal.asOf ? <Badge tone="outline">{t("statedCurrent", { date: formatPartialDateString(primary.temporal.asOf, locale) })}</Badge> : null}
+          {current && primary.temporal.asOf ? (
+            <Badge tone="outline">
+              {t(primary.temporal.asOfBasis === "accessed" ? "statedCurrentAccessed" : "statedCurrent", { date: formatPartialDateString(primary.temporal.asOf, locale) })}
+            </Badge>
+          ) : null}
           {primary.temporal.possiblyOutdated ? <Badge tone="warn">{t("possiblyOutdated")}</Badge> : null}
-          {primary.isTranslated ? <Badge tone="outline">{t("translated", { language: primary.language.toUpperCase() })}</Badge> : null}
+          {primary.isTranslated ? <Badge tone="outline">{t("translated", { language: tLanguages(primary.language) })}</Badge> : null}
         </div>
         {conflicting ? (
           <ul className="mt-2 space-y-1 rounded-md bg-danger-soft/60 px-3 py-2 text-[13px] text-ink-2">
@@ -115,7 +126,7 @@ function TimelineEntry({ claims }: { claims: ClaimView[] }) {
             ))}
           </ul>
         ) : null}
-        {primary.uncertaintyNote && !conflicting ? <p className="mt-1.5 text-xs text-muted">{primary.uncertaintyNote}</p> : null}
+        {uncertainty && !conflicting ? <p className="mt-1.5 text-xs text-muted">{uncertainty}</p> : null}
       </div>
     </li>
   );
@@ -153,6 +164,9 @@ function Block({ title, description, children, id }: { title: string; descriptio
 export function OverviewTab() {
   const { view } = useEvidence();
   const t = useTranslations("Overview");
+  const tLanguages = useTranslations("Evidence.languages");
+  const tGaps = useTranslations("Gaps");
+  const tCategories = useTranslations("Sources.categories");
   const locale = useLocale();
   const overview = view.snapshot.overview;
   const employment = view.claims.filter((c) => c.category === "employment");
@@ -223,7 +237,7 @@ export function OverviewTab() {
                       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                         <span className="text-xs text-muted tabular">{[formatPartialDate(c.temporal.start, locale), formatPartialDate(c.temporal.end, locale)].filter(Boolean).join(" – ") || "—"}</span>
                         {g.length > 1 || c.evidenceStatus === "conflicting" ? <Badge tone="danger">{t("conflict")}</Badge> : <EvidenceStatusBadge status={c.evidenceStatus} />}
-                        {c.isTranslated ? <Badge tone="outline">{t("translated", { language: c.language.toUpperCase() })}</Badge> : null}
+                        {c.isTranslated ? <Badge tone="outline">{t("translated", { language: tLanguages(c.language) })}</Badge> : null}
                       </div>
                       {c.isTranslated && c.originalText ? (
                         <p className="mt-1 text-xs text-muted">
@@ -308,7 +322,7 @@ export function OverviewTab() {
                 {overview.gaps.map((g) => (
                   <li key={g.code} className="flex gap-2.5 text-[13.5px] leading-relaxed text-ink-2">
                     <Info className="mt-0.5 h-4 w-4 shrink-0 text-subtle" aria-hidden />
-                    {g.text}
+                    {gapText(g, (k, v) => tGaps(k as never, v as never), (k) => tCategories(k as never))}
                   </li>
                 ))}
               </ul>

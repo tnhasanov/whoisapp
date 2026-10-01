@@ -155,3 +155,26 @@ describe("formatPartialDate", () => {
     expect(formatPartialDateString("2014", "ru")).toBe("2014");
   });
 });
+
+describe("locale-safe formatting", () => {
+  it("formats Azerbaijani dates without relying on the runtime's locale data", async () => {
+    const { formatDateTime } = await import("@/lib/i18n/format-date");
+    const instant = new Date("2026-10-01T13:39:05Z");
+    expect(formatDateTime(instant, "az", "Asia/Baku", "date")).toBe("1 okt 2026");
+    expect(formatDateTime(instant, "az", "Asia/Baku", "dateTime")).toBe("1 okt 2026, 17:39");
+    expect(formatDateTime(instant, "az", "Asia/Baku", "dateShort")).toBe("01.10.26");
+    expect(formatDateTime(instant, "az", "Asia/Baku", "timeSeconds")).toBe("17:39:05");
+    expect(formatDateTime(instant, "az", "UTC", "time")).toBe("13:39");
+    expect(formatPartialDateString("2014-09", "az")).toBe("sen 2014");
+    expect(formatPartialDateString("2017-10-01", "az")).toBe("1 okt 2017");
+    expect(formatPartialDate({ year: 2014, approximate: true }, "az")).toBe("təq. 2014");
+    expect(formatPartialDate({ year: 2014, approximate: true }, "ru")).toBe("ок. 2014");
+  });
+
+  it("uses the viewer's time zone for other languages", async () => {
+    const { formatDateTime } = await import("@/lib/i18n/format-date");
+    const instant = new Date("2026-10-01T22:30:00Z");
+    expect(formatDateTime(instant, "en-GB", "Asia/Baku", "date")).toBe("2 Oct 2026");
+    expect(formatDateTime(instant, "en-GB", "UTC", "date")).toBe("1 Oct 2026");
+  });
+});

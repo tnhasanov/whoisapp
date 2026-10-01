@@ -58,8 +58,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ prof
 
   registerPdfFonts();
   const locale = viewer.locale;
-  const [pdf, evidence, contacts, accounts, connections, news] = await Promise.all(
-    ["Pdf", "Evidence", "Contacts", "Accounts", "Connections", "News"].map((namespace) => getTranslations({ locale, namespace })),
+  const [pdf, evidence, contacts, accounts, connections, news, gaps, categories, identity] = await Promise.all(
+    ["Pdf", "Evidence", "Contacts", "Accounts", "Connections", "News", "Gaps", "Sources.categories", "Identity.methods"].map((namespace) =>
+      getTranslations({ locale, namespace }),
+    ),
   );
   const data = buildBriefData(view, {
     locale,
@@ -73,6 +75,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ prof
       accounts: (k, v) => accounts(k as never, v as never),
       connections: (k, v) => connections(k as never, v as never),
       news: (k, v) => news(k as never, v as never),
+      gaps: (k, v) => gaps(k as never, v as never),
+      categories: (k, v) => categories(k as never, v as never),
+      identity: (k, v) => identity(k as never, v as never),
     },
   });
   const buffer = await renderToBuffer(<BriefDocument data={data} />);

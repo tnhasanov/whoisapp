@@ -15,7 +15,9 @@ import { ownerSettings, usageRecords, workerHeartbeats } from "@/lib/db/schema";
 import { getEnv, getProviderStatus } from "@/lib/env";
 import { resolveLimits } from "@/lib/research/config";
 
-export const metadata = { title: "Settings" };
+export async function generateMetadata() {
+  return { title: (await getTranslations("Meta"))("settings") };
+}
 export const dynamic = "force-dynamic";
 
 function StatusRow({ label, ok, okLabel, missingLabel, detail }: { label: string; ok: boolean; okLabel: string; missingLabel: string; detail?: ReactNode }) {

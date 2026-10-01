@@ -75,6 +75,8 @@ export async function loadSnapshotData(db: Database, ownerId: string, snapshotId
     db.select().from(mediaStoryGroups).where(and(eq(mediaStoryGroups.snapshotId, snapshotId), eq(mediaStoryGroups.ownerId, ownerId))).orderBy(asc(mediaStoryGroups.relevanceRank)),
     db.select().from(mediaItems).where(and(eq(mediaItems.snapshotId, snapshotId), eq(mediaItems.ownerId, ownerId))),
   ]);
+  // Source keys are "S1", "S2" … "S10": order them by number, not as text.
+  srcs.sort((a, b) => Number(a.sourceKey.slice(1)) - Number(b.sourceKey.slice(1)) || a.sourceKey.localeCompare(b.sourceKey));
   const evidenceByClaim = new Map<string, ClaimView["evidence"]>();
   for (const l of links) {
     if (!evidenceByClaim.has(l.claimId)) evidenceByClaim.set(l.claimId, []);

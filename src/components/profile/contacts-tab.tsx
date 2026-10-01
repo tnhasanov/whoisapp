@@ -1,7 +1,7 @@
 "use client";
 
 import { AtSign, Building2, ExternalLink, Globe, Headset, Link2, Mail, Phone, PhoneCall, Smartphone, UserRound } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useEvidence } from "@/components/evidence/evidence-context";
 import { Badge } from "@/components/ui/badge";
 import { Card, SectionHeading } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/feedback";
 import type { AccountView, ContactView } from "@/lib/data/profiles";
 import type { ContactType } from "@/lib/domain/types";
 import { displayHost, sourceHref } from "@/lib/source-links";
+import { useDateFormat } from "@/lib/i18n/use-date-format";
 
 const CONTACT_ICONS: Record<ContactType, typeof Mail> = {
   work_email: Mail,
@@ -23,7 +24,7 @@ const CONTACT_ICONS: Record<ContactType, typeof Mail> = {
 function ContactRow({ contact }: { contact: ContactView }) {
   const { open, view } = useEvidence();
   const t = useTranslations("Contacts");
-  const format = useFormatter();
+  const fmtDate = useDateFormat();
   const Icon = CONTACT_ICONS[contact.contactType];
   const source = view.sources.find((s) => s.id === contact.sourceId);
   const isLink = contact.contactType === "contact_page";
@@ -55,7 +56,7 @@ function ContactRow({ contact }: { contact: ContactView }) {
           {contact.purpose ? <p className="text-[12.5px] text-muted">{contact.purpose}</p> : null}
           <div className="mt-2 flex flex-wrap gap-1.5">
             <Badge tone={contact.isDirect ? "ok" : contact.belongsTo === "organisation" ? "warn" : "neutral"}>{t(`owner.${contact.belongsTo}`)}</Badge>
-            <Badge tone="outline">{t("lastChecked", { date: format.dateTime(new Date(contact.lastCheckedAt), { dateStyle: "medium" }) })}</Badge>
+            <Badge tone="outline">{t("lastChecked", { date: fmtDate(contact.lastCheckedAt, "date") })}</Badge>
           </div>
         </div>
       </div>

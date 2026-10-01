@@ -53,22 +53,23 @@ export class ResearchCommandError extends Error {
   }
 }
 
+/** Field errors are message codes; the UI translates them (Errors.fields.*). */
 const optionalText = (max: number) =>
   z
     .string()
     .trim()
-    .max(max)
+    .max(max, "too_long")
     .optional()
     .nullable()
     .transform((v) => (v ? v : null));
 
 export const SearchInputSchema = z.object({
   fullName: z
-    .string({ error: "Enter the person's full name." })
+    .string({ error: "name_required" })
     .trim()
-    .min(2, "Enter the person's full name.")
-    .max(120, "The name is too long.")
-    .refine((v) => /\p{L}/u.test(v), "Enter the person's full name."),
+    .min(2, "name_required")
+    .max(120, "too_long")
+    .refine((v) => /\p{L}/u.test(v), "name_required"),
   company: optionalText(120),
   country: optionalText(60),
   profileUrl: optionalText(2048),
@@ -88,12 +89,7 @@ export function parseSearchInput(raw: SearchInput): ResearchQuery {
     const check = validateProfileUrl(parsed.data.profileUrl);
     if (!check.ok) {
       throw new ResearchCommandError("invalid_input", "Please correct the highlighted fields.", {
-        profileUrl:
-          check.reason === "scheme"
-            ? "Use an http(s) address."
-            : check.reason === "credentials"
-              ? "Remove the username or password from the address."
-              : "Enter a public web address (internal or private addresses are not allowed).",
+        profileUrl: check.reason === "scheme" ? "url_scheme" : check.reason === "credentials" ? "url_credentials" : "url_private",
       });
     }
     profileUrl = check.url.toString();

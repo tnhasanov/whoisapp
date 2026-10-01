@@ -5,8 +5,11 @@ import { JobProgress } from "@/components/research/job-progress";
 import { requireViewer } from "@/lib/auth/session";
 import { getJobView } from "@/lib/data/jobs";
 import { getDb } from "@/lib/db/client";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = { title: "Research run" };
+export async function generateMetadata() {
+  return { title: (await getTranslations("Meta"))("researchRun") };
+}
 export const dynamic = "force-dynamic";
 
 export default async function JobPage({ params }: { params: Promise<{ jobId: string }> }) {

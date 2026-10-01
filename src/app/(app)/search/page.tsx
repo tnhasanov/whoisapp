@@ -15,7 +15,9 @@ import { recentSearches } from "@/lib/data/jobs";
 import { getDb } from "@/lib/db/client";
 import { getProviderStatus } from "@/lib/env";
 
-export const metadata = { title: "Research" };
+export async function generateMetadata() {
+  return { title: (await getTranslations("Meta"))("research") };
+}
 
 type Params = { name?: string; company?: string; country?: string; profileUrl?: string };
 

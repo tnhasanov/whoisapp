@@ -8,7 +8,9 @@ import { ownerExists } from "@/lib/auth/owner";
 import { getViewer } from "@/lib/auth/session";
 import { getEnv } from "@/lib/env";
 
-export const metadata = { title: "Sign in" };
+export async function generateMetadata() {
+  return { title: (await getTranslations("Meta"))("signIn") };
+}
 
 export default async function SignInPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const viewer = await getViewer();

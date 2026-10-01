@@ -264,6 +264,7 @@ const OUTDATED_AFTER_MONTHS = 18;
 export function temporalFor(claim: MergedClaim, researchedAt: Date): { temporal: Temporal; uncertaintyNote: string | null } {
   let currency: CurrencyState = "unknown";
   let asOf: string | null = null;
+  let asOfBasis: "published" | "accessed" | undefined;
   let possiblyOutdated = false;
   const notes: string[] = [];
 
@@ -272,12 +273,13 @@ export function temporalFor(claim: MergedClaim, researchedAt: Date): { temporal:
     currency = "ended";
   } else if (stating.length > 0) {
     currency = "stated_current";
-    const asOfDates = stating
-      .map((m) => m.sourcePublishedAt ?? m.sourceAccessedAt.slice(0, 10))
-      .filter(Boolean)
-      .sort()
-      .reverse();
-    asOf = asOfDates[0] ?? null;
+    // The freshest statement wins. For an undated page the date is when it was read, which only
+    // shows the page still said so then; the basis is kept so the UI never calls it a publication date.
+    const statements = stating
+      .map((m) => (m.sourcePublishedAt ? { date: m.sourcePublishedAt, basis: "published" as const } : { date: m.sourceAccessedAt.slice(0, 10), basis: "accessed" as const }))
+      .sort((a, b) => b.date.localeCompare(a.date) || (a.basis === "published" ? -1 : 1));
+    asOf = statements[0]?.date ?? null;
+    asOfBasis = statements[0]?.basis;
     const freshest = parsePartialDate(asOf);
     if (freshest && monthsBetween(partialDateStart(freshest), researchedAt) > OUTDATED_AFTER_MONTHS) {
       possiblyOutdated = true;
@@ -291,7 +293,7 @@ export function temporalFor(claim: MergedClaim, researchedAt: Date): { temporal:
   }
   if (claim.start?.approximate) notes.push("Start date is approximate in the source.");
   return {
-    temporal: { start: claim.start, end: claim.end, currency, asOf, possiblyOutdated },
+    temporal: { start: claim.start, end: claim.end, currency, asOf, ...(asOfBasis ? { asOfBasis } : {}), possiblyOutdated },
     uncertaintyNote: notes.length ? notes.join(" ") : null,
   };
 }

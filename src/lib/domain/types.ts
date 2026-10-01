@@ -264,6 +264,8 @@ export type Temporal = {
   currency: CurrencyState;
   /** ISO date of the source publication or access that the currency statement is based on. */
   asOf: string | null;
+  /** "accessed": the page was undated, so asOf is when it was read — not a publication date. */
+  asOfBasis?: "published" | "accessed";
   /** Set when a "current" statement comes from an old source. */
   possiblyOutdated: boolean;
 };

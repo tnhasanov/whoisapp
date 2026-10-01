@@ -2,7 +2,7 @@
 
 import { AlertTriangle, ChevronDown, ExternalLink, FileText, Lock, SearchCheck } from "lucide-react";
 import Link from "next/link";
-import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { useEvidence } from "@/components/evidence/evidence-context";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { formatPartialDate, formatPartialDateString } from "@/lib/dates/partial-
 import type { SourceView } from "@/lib/data/profiles";
 import { displayHost, sourceHref } from "@/lib/source-links";
 import { cn } from "@/lib/utils";
+import { useDateFormat } from "@/lib/i18n/use-date-format";
 
 type Filter = "all" | "yes" | "no" | "limited";
 
@@ -62,7 +63,7 @@ export function SourcesTab() {
   const t = useTranslations("Sources");
   const tEv = useTranslations("Evidence");
   const locale = useLocale();
-  const format = useFormatter();
+  const fmtDate = useDateFormat();
   const [filter, setFilter] = useState<Filter>("all");
   const [showRejected, setShowRejected] = useState(false);
   const sources = view.sources.filter((s) =>
@@ -92,7 +93,7 @@ export function SourcesTab() {
               onClick={() => setFilter(f.key)}
               className={cn("rounded-full border px-3 py-1 text-[12.5px] font-medium", filter === f.key ? "border-accent bg-accent-soft text-accent-ink" : "border-line text-muted hover:text-ink")}
             >
-              {f.label} <span className="tabular opacity-70">{f.count}</span>
+              {f.label} <span className="tabular font-normal">{f.count}</span>
             </button>
           ))}
         </div>
@@ -180,7 +181,7 @@ export function SourcesTab() {
         </Card>
         <p className="mt-2 text-xs text-muted">
           {view.snapshot.modelInfo.provider === "fixture" ? t("modelFixture") : t("model", { model: view.snapshot.modelInfo.model, prompt: view.snapshot.modelInfo.promptVersion })} ·{" "}
-          {format.dateTime(new Date(view.snapshot.researchedAt), { dateStyle: "medium", timeStyle: "short" })}
+          {fmtDate(view.snapshot.researchedAt, "dateTime")}
         </p>
       </section>
 
@@ -188,7 +189,7 @@ export function SourcesTab() {
         <SectionHeading id="rejected-heading" title={t("rejected")} description={t("rejectedHint")} />
         <Card className="p-4">
           {rejected.length === 0 ? (
-            <p className="text-sm text-muted">—</p>
+            <p className="text-sm text-muted">{t("rejectedNone")}</p>
           ) : (
             <>
               <ul className="flex flex-wrap gap-2">

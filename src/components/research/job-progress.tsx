@@ -12,6 +12,8 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Callout } from "@/components/ui/feedback";
 import type { JobView, StageView } from "@/lib/data/jobs";
 import { cn } from "@/lib/utils";
+import { identityReason } from "@/lib/i18n/identity";
+import { useDateFormat } from "@/lib/i18n/use-date-format";
 
 const ACTIVE = new Set(["queued", "running"]);
 
@@ -25,11 +27,11 @@ function useNow(active: boolean) {
   return now;
 }
 
-function formatDuration(ms: number): string {
+function formatDuration(ms: number, t: (key: "durationHours" | "durationMinutes", values: Record<string, string | number>) => string): string {
   const total = Math.max(0, Math.round(ms / 1000));
   const m = Math.floor(total / 60);
   const s = total % 60;
-  return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}:${String(s).padStart(2, "0")}`;
+  return m >= 60 ? t("durationHours", { hours: Math.floor(m / 60), minutes: m % 60 }) : t("durationMinutes", { minutes: m, seconds: String(s).padStart(2, "0") });
 }
 
 function newKey() {
@@ -40,7 +42,9 @@ export function JobProgress({ initial }: { initial: JobView }) {
   const t = useTranslations("Job");
   const tStatus = useTranslations("Search.statuses");
   const tEvents = useTranslations("JobEvents");
-  const format = useFormatter();
+  const tMethods = useTranslations("Identity.methods");
+  const tKinds = useTranslations("Activity.kinds");
+  const fmtDate = useDateFormat();
   const router = useRouter();
   const [job, setJob] = useState(initial);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -86,6 +90,19 @@ export function JobProgress({ initial }: { initial: JobView }) {
   const name = job.query.fullName;
   const terminal = !active;
 
+  // Keep the newest activity in view unless the reader has scrolled up to older entries.
+  const eventList = useRef<HTMLOListElement>(null);
+  const eventCount = job.events.length;
+  useEffect(() => {
+    const list = eventList.current;
+    if (!list) return;
+    const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 80;
+    if (nearBottom || list.dataset.seen !== "1") {
+      list.scrollTop = list.scrollHeight;
+      list.dataset.seen = "1";
+    }
+  }, [eventCount]);
+
   const eventText = (e: JobView["events"][number]) => {
     const data = e.data ?? {};
     const key = e.code.replace(/\./g, "_") as Parameters<typeof tEvents>[0];
@@ -113,17 +130,17 @@ export function JobProgress({ initial }: { initial: JobView }) {
         <div className="min-w-0">
           <div className="label-caps mb-1.5 flex items-center gap-2">
             {t("eyebrow")}
-            {job.workspace === "demo" ? <Badge tone="demo">Demo</Badge> : null}
-            {job.kind !== "search" ? <Badge tone="outline">{job.kind}</Badge> : null}
+            {job.workspace === "demo" ? <Badge tone="demo">{t("demoBadge")}</Badge> : null}
+            {job.kind !== "search" ? <Badge tone="outline">{tKinds(job.kind as "refresh" | "retry")}</Badge> : null}
           </div>
           <h1 className="font-serif text-[28px] font-semibold leading-tight tracking-[-0.02em] text-ink sm:text-[32px]">
             {job.outcome === "no_candidates" ? t("titleNone") : active ? t("titleRunning", { name }) : t("titleDone", { name })}
           </h1>
           <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-muted">
-            <span className="tabular">{t("elapsed", { time: formatDuration(elapsed) })}</span>
+            <span className="tabular">{t("elapsed", { time: formatDuration(elapsed, t) })}</span>
             {job.query.company ? <span>· {job.query.company}</span> : null}
             {job.query.country ? <span>· {job.query.country}</span> : null}
-            <span>· {format.dateTime(new Date(job.createdAt), { dateStyle: "medium", timeStyle: "short" })}</span>
+            <span>· {fmtDate(job.createdAt, "dateTime")}</span>
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -170,7 +187,7 @@ export function JobProgress({ initial }: { initial: JobView }) {
             ) : null
           }
         >
-          {job.identityResolution.reason}
+          {identityReason(job.identityResolution, (k, v) => tMethods(k as never, v as never))}
         </Callout>
       ) : null}
 
@@ -202,11 +219,11 @@ export function JobProgress({ initial }: { initial: JobView }) {
 
         <Card className="flex max-h-[520px] flex-col p-0">
           <h2 className="border-b border-line px-5 py-3 label-caps">{t("activity")}</h2>
-          <ol className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-5 py-4 text-[13px] scrollbar-thin" aria-live="polite" aria-relevant="additions">
+          <ol ref={eventList} className="min-h-0 flex-1 space-y-2.5 overflow-y-auto px-5 py-4 text-[13px] scrollbar-thin" aria-live="polite" aria-relevant="additions">
             {job.events.length === 0 ? <li className="text-muted">{t("noEvents")}</li> : null}
             {job.events.map((e) => (
               <li key={e.id} className="flex gap-3">
-                <span className="w-12 shrink-0 pt-px text-[11.5px] text-subtle tabular">{format.dateTime(new Date(e.at), { timeStyle: "medium" })}</span>
+                <span className="shrink-0 whitespace-nowrap pt-px text-[11.5px] text-subtle tabular">{fmtDate(e.at, "timeSeconds")}</span>
                 <span className={cn("min-w-0 break-anywhere", e.level === "error" ? "text-danger" : e.level === "warn" ? "text-warn" : "text-ink-2")}>{eventText(e)}</span>
               </li>
             ))}

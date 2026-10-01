@@ -7,7 +7,9 @@ import { Card } from "@/components/ui/card";
 import { findFixtureDocument } from "@/fixtures/world";
 import { requireViewer } from "@/lib/auth/session";
 
-export const metadata = { title: "Fictional source" };
+export async function generateMetadata() {
+  return { title: (await getTranslations("Meta"))("fictionalSource") };
+}
 
 /** Local viewer for fictional fixture sources: demo links never point at live websites. */
 export default async function FixtureSourcePage({ params }: { params: Promise<{ key: string }> }) {
@@ -26,7 +28,7 @@ export default async function FixtureSourcePage({ params }: { params: Promise<{ 
       </div>
       <Card className="p-6 sm:p-8">
         <p className="label-caps flex flex-wrap items-center gap-2">
-          {t("title")} <Badge tone="demo">Demo</Badge> <Badge tone="outline">{tTypes(doc.sourceType)}</Badge>
+          {t("title")} <Badge tone="demo">{t("demoBadge")}</Badge> <Badge tone="outline">{tTypes(doc.sourceType)}</Badge>
         </p>
         <h1 lang={lang} className="mt-2 font-serif text-[26px] font-semibold leading-tight tracking-[-0.015em] text-ink">
           {doc.title}

@@ -160,7 +160,7 @@ export function evaluateCandidates(
 }
 
 export type AutoSelection =
-  | { decision: "auto"; rank: number; method: IdentityResolutionMethod; reason: string }
+  | { decision: "auto"; rank: number; method: IdentityResolutionMethod; reason: string; params?: { company?: string; domains?: number } }
   | { decision: "ask"; reason: string }
   | { decision: "none"; reason: string };
 
@@ -182,6 +182,7 @@ export function decideIdentity(candidates: EvaluatedCandidate[], query: Identity
         rank: only.rank,
         method: "auto_unique_company_match",
         reason: `Selected automatically: it is the only candidate linked to "${query.company}", the name matches, and ${only.independentDomains} independent websites describe them.`,
+        params: { company: query.company, domains: only.independentDomains },
       };
     }
   }

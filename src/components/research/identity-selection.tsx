@@ -43,7 +43,7 @@ export function IdentitySelection({ job }: { job: JobView }) {
       <div>
         <div className="label-caps mb-1.5 flex items-center gap-2">
           {tJob("eyebrow")}
-          {job.workspace === "demo" ? <Badge tone="demo">Demo</Badge> : null}
+          {job.workspace === "demo" ? <Badge tone="demo">{tJob("demoBadge")}</Badge> : null}
         </div>
         <h1 className="font-serif text-[28px] font-semibold leading-tight tracking-[-0.02em] text-ink sm:text-[32px]">{tJob("titleIdentity", { name: job.query.fullName })}</h1>
         <p className="mt-2 max-w-2xl text-[14.5px] leading-relaxed text-muted">{t("subtitle", { count: job.candidates.length })}</p>

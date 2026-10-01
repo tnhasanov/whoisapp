@@ -6,7 +6,9 @@ import { Callout } from "@/components/ui/feedback";
 import { ownerExists } from "@/lib/auth/owner";
 import { getEnv } from "@/lib/env";
 
-export const metadata = { title: "Setup" };
+export async function generateMetadata() {
+  return { title: (await getTranslations("Meta"))("setup") };
+}
 
 export default async function SetupPage() {
   const t = await getTranslations("Setup");

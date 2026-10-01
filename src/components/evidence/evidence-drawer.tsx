@@ -2,7 +2,7 @@
 
 import { ArrowLeft, CheckCircle2, ExternalLink, FileText, Flag } from "lucide-react";
 import Link from "next/link";
-import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Sheet } from "@/components/ui/sheet";
@@ -12,6 +12,8 @@ import { displayHost, sourceHref } from "@/lib/source-links";
 import { cn } from "@/lib/utils";
 import { EvidenceStatusBadge } from "./evidence-badge";
 import type { EvidenceTarget } from "./evidence-context";
+import { useDateFormat } from "@/lib/i18n/use-date-format";
+import { uncertaintyText } from "@/lib/i18n/uncertainty";
 
 type Props = {
   view: ProfileView;
@@ -120,7 +122,7 @@ function langAttr(code: string | null | undefined) {
 export function SourceCard({ source, excerpt, excerptLanguage, verified, onOpenSource }: { source: SourceView; excerpt?: string | null; excerptLanguage?: string | null; verified?: boolean; onOpenSource?: () => void }) {
   const t = useTranslations("Evidence");
   const tTypes = useTranslations("SourceTypes");
-  const format = useFormatter();
+  const fmtDate = useDateFormat();
   const locale = useLocale();
   const link = sourceHref(source);
   return (
@@ -152,11 +154,13 @@ export function SourceCard({ source, excerpt, excerptLanguage, verified, onOpenS
         <Badge tone={source.accessStatus === "read" ? "neutral" : "warn"}>{t(`access.${source.accessStatus}`)}</Badge>
         {source.language !== "unknown" ? <Badge tone="outline">{t(`languages.${source.language}`)}</Badge> : null}
       </div>
-      <dl className="mt-2 space-y-0.5 text-xs text-muted">
-        <dd>{source.publishedAt ? t("published", { date: formatPartialDateString(source.publishedAt, locale) }) : t("publishedUnknown")}</dd>
-        {!source.publishedAt && source.providerReportedDate ? <dd>{t("providerDate", { date: formatPartialDateString(source.providerReportedDate, locale) })}</dd> : null}
-        <dd>{t("accessed", { date: format.dateTime(new Date(source.accessedAt), { dateStyle: "medium" }) })} · {t(`method.${source.accessMethod}`)}</dd>
-      </dl>
+      <div className="mt-2 space-y-0.5 text-xs text-muted">
+        <p>{source.publishedAt ? t("published", { date: formatPartialDateString(source.publishedAt, locale) }) : t("publishedUnknown")}</p>
+        {!source.publishedAt && source.providerReportedDate ? <p>{t("providerDate", { date: formatPartialDateString(source.providerReportedDate, locale) })}</p> : null}
+        <p>
+          {t("accessed", { date: fmtDate(source.accessedAt, "date") })} · {t(`method.${source.accessMethod}`)}
+        </p>
+      </div>
       {excerpt ? (
         <figure className="mt-3">
           <figcaption className="label-caps mb-1">{t("supportingExcerpt")}</figcaption>
@@ -191,14 +195,16 @@ function DrawerBody({ view, target, onNavigate }: { view: ProfileView; target: E
   const tConn = useTranslations("Connections");
   const tNews = useTranslations("News");
   const tSources = useTranslations("Sources");
+  const tUncertainty = useTranslations("Uncertainty");
   const locale = useLocale();
-  const format = useFormatter();
+  const fmtDate = useDateFormat();
   const sourceById = (id: string | null | undefined) => (id ? view.sources.find((s) => s.id === id) : undefined);
 
   if (target.kind === "claim") {
     const claim = view.claims.find((c) => c.id === target.id)!;
     const others = claim.conflictGroup ? view.claims.filter((c) => c.conflictGroup === claim.conflictGroup && c.id !== claim.id) : [];
     const temporal = claim.temporal;
+    const uncertainty = uncertaintyText(temporal, claim.uncertaintyNote, locale, (key, values) => tUncertainty(key, values));
     const period = [formatPartialDate(temporal.start, locale), temporal.end ? formatPartialDate(temporal.end, locale) : temporal.currency === "stated_current" ? "…" : ""].filter(Boolean).join(" – ");
     return (
       <div>
@@ -207,13 +213,13 @@ function DrawerBody({ view, target, onNavigate }: { view: ProfileView; target: E
           {period ? <Row label={t("period")}>{period}</Row> : null}
           <Row label={t("currency")}>
             {temporal.currency === "stated_current"
-              ? t("currencyStated", { date: temporal.asOf ? formatPartialDateString(temporal.asOf, locale) : "—" })
+              ? t(temporal.asOfBasis === "accessed" ? "currencyStatedAccessed" : "currencyStated", { date: temporal.asOf ? formatPartialDateString(temporal.asOf, locale) : "—" })
               : temporal.currency === "ended"
                 ? t("currencyEnded")
                 : t("currencyUnknown")}
             {temporal.possiblyOutdated ? <Badge tone="warn" className="ml-2">{tOverview("possiblyOutdated")}</Badge> : null}
           </Row>
-          {claim.uncertaintyNote ? <Row label={t("uncertainty")}>{claim.uncertaintyNote}</Row> : null}
+          {uncertainty ? <Row label={t("uncertainty")}>{uncertainty}</Row> : null}
           {claim.isTranslated && claim.originalText ? (
             <Row label={tOverview("translated", { language: t(`languages.${claim.language}`) })}>
               <span lang={langAttr(claim.language)} className="font-serif">
@@ -291,7 +297,7 @@ function DrawerBody({ view, target, onNavigate }: { view: ProfileView; target: E
           <Row label={t("ownerLabel")}>{c.ownerLabel}</Row>
           <Row label={tContacts("purpose")}>{c.purpose ?? "—"}</Row>
           <Row label={tContacts("context")}>{c.publicationContext}</Row>
-          <Row label={t("lastChecked")}>{format.dateTime(new Date(c.lastCheckedAt), { dateStyle: "medium" })}</Row>
+          <Row label={t("lastChecked")}>{fmtDate(c.lastCheckedAt, "date")}</Row>
         </dl>
         {source ? (
           <Section title={t("title")}>
@@ -377,7 +383,7 @@ function DrawerBody({ view, target, onNavigate }: { view: ProfileView; target: E
             {!m.publishedAt && m.providerReportedDate ? <span className="block text-xs text-muted">{t("providerDate", { date: formatPartialDateString(m.providerReportedDate, locale) })}</span> : null}
           </Row>
           {m.eventDate ? <Row label={tNews("eventDate")}>{formatPartialDate(m.eventDate, locale)}</Row> : null}
-          <Row label={t("found")}>{format.dateTime(new Date(m.discoveredAt), { dateStyle: "medium" })}</Row>
+          <Row label={t("found")}>{fmtDate(m.discoveredAt, "date")}</Row>
           <Row label={t("language")}>{t(`languages.${m.language}`)}</Row>
           {m.involvement ? <Row label={tNews("involvement")}>{m.involvement}</Row> : null}
           {m.matchEvidence ? <Row label={tNews("matchEvidence")}>{m.matchEvidence}</Row> : null}

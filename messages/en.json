@@ -35,7 +35,8 @@
     "notFoundTitle": "Not found",
     "notFoundBody": "This page does not exist or you do not have access to it.",
     "goToSearch": "Go to search",
-    "asOf": "stated as of {date}"
+    "asOf": "stated as of {date}",
+    "asOfAccessed": "current on a page read {date}"
   },
   "Nav": {
     "primary": "Main navigation",
@@ -96,7 +97,13 @@
       "exists": "An owner account already exists.",
       "token": "The setup token is not valid.",
       "mismatch": "The passwords do not match.",
-      "rateLimited": "Too many attempts. Please wait and try again."
+      "rateLimited": "Too many attempts. Please wait and try again.",
+      "invalid_name": "Enter a name (up to 120 characters).",
+      "invalid_email": "Enter a valid email address.",
+      "password_short": "Password must be at least 12 characters.",
+      "password_long": "Password must be at most 128 characters.",
+      "email_taken": "A user with this email already exists.",
+      "failed": "Could not create the owner account."
     }
   },
   "Search": {
@@ -209,7 +216,10 @@
     "statSources": "Sources",
     "statRead": "Read",
     "statLimited": "Limited",
-    "stagesLabel": "Research stages"
+    "stagesLabel": "Research stages",
+    "demoBadge": "Demo",
+    "durationHours": "{hours} h {minutes} min",
+    "durationMinutes": "{minutes}:{seconds}"
   },
   "Identity": {
     "subtitle": "We found {count, plural, one {one possible match} other {# different people}} with this name. A name alone is not enough to confirm identity — choose the person you mean.",
@@ -227,7 +237,13 @@
     "noneHint": "We will not research anyone. You can adjust the name, company or country.",
     "autoSelected": "Auto-selected",
     "distinguishing": "Distinguishing details",
-    "location": "Published location"
+    "location": "Published location",
+    "methods": {
+      "user_selected": "Chosen by you on the identity-selection screen.",
+      "auto_profile_url": "Selected automatically: it is the only candidate whose sources include the profile address you supplied.",
+      "auto_unique_company_match": "Selected automatically: it is the only candidate linked to “{company}”, the name matches, and {domains} independent websites describe them.",
+      "refresh_existing_profile": "Refreshing an existing profile; the identity was confirmed earlier."
+    }
   },
   "Profile": {
     "eyebrow": "Person brief",
@@ -276,7 +292,9 @@
     "tags": "Tags",
     "addTag": "Add tag",
     "tagPlaceholder": "New tag",
-    "removeTag": "Remove tag {name}"
+    "removeTag": "Remove tag {name}",
+    "demoFictional": "Demo · fictional",
+    "partialBadge": "Partial"
   },
   "Overview": {
     "summary": "Summary",
@@ -314,7 +332,9 @@
       "biography": "Biography",
       "award": "Award",
       "publication": "Publication"
-    }
+    },
+    "memberFallback": "Member",
+    "statedCurrentAccessed": "Current on an undated page read {date}"
   },
   "Evidence": {
     "title": "Evidence",
@@ -396,7 +416,8 @@
     "organisation": "Organisation",
     "project": "Project",
     "language": "Language",
-    "found": "Found"
+    "found": "Found",
+    "currencyStatedAccessed": "Described as current on an undated page read {date} — not a publication date"
   },
   "SourceTypes": {
     "official_bio": "Official biography",
@@ -429,7 +450,7 @@
     "owner": {
       "person": "Reaches the person",
       "assistant": "Reaches their office",
-      "organisation": "Organisation number — not a direct line"
+      "organisation": "Organisation — not direct"
     },
     "direct": "Direct",
     "notDirect": "Not a direct line",
@@ -603,7 +624,8 @@
     },
     "model": "Analysis: {model} · prompt {prompt}",
     "modelFixture": "Analysis: fictional fixture replay (no model calls)",
-    "notesOnly": "Source content is not stored beyond short excerpts."
+    "notesOnly": "Source content is not stored beyond short excerpts.",
+    "rejectedNone": "Nothing proposed by the analysis was rejected."
   },
   "Changes": {
     "title": "What changed?",
@@ -679,7 +701,8 @@
     "outcomes": {
       "no_candidates": "No matches",
       "refined": "Refined"
-    }
+    },
+    "startResearch": "Start research"
   },
   "Settings": {
     "title": "Settings",
@@ -776,7 +799,8 @@
     "access": "Simulated access",
     "body": "Text",
     "snippetOnly": "Only a search snippet exists for this source in the demo (simulated login wall or paywall).",
-    "runDate": "Published on the day of the research run (simulated new article)."
+    "runDate": "Published on the day of the research run (simulated new article).",
+    "demoBadge": "Demo"
   },
   "Errors": {
     "invalid_input": "Please correct the highlighted fields.",
@@ -784,7 +808,15 @@
     "live_not_allowed": "Live research is only available to the owner account.",
     "rate_limited": "Too many research runs this hour. Please wait and try again.",
     "not_found": "Not found.",
-    "invalid_state": "This action is no longer available for this research."
+    "invalid_state": "This action is no longer available for this research.",
+    "fields": {
+      "name_required": "Enter the person's full name.",
+      "too_long": "This is too long.",
+      "url_scheme": "Use an http(s) address.",
+      "url_credentials": "Remove the username or password from the address.",
+      "url_private": "Enter a public web address (internal or private addresses are not allowed).",
+      "invalid": "Check this field."
+    }
   },
   "JobEvents": {
     "job_queued": "Research queued.",
@@ -792,7 +824,7 @@
     "names_variants": "Prepared {count} spelling variants for searching.",
     "search_completed": "{query}: {results, plural, =0 {no results} one {# result} other {# results}}.",
     "candidates_found": "Found {count, plural, =0 {no people} one {# person} other {# distinct people}} matching the name.",
-    "identity_awaiting": "Several possible matches were found. Choose the right person to continue.",
+    "identity_awaiting": "{count, plural, one {One possible match was found. A name alone is not enough to confirm identity — please confirm the person.} other {# possible matches were found. Choose the right person to continue.}}",
     "identity_selected": "Identity chosen; research continues.",
     "identity_none": "None of the candidates matched; search refined.",
     "identity_reopened": "Identity choice reopened. Choose the right person to continue.",
@@ -812,7 +844,7 @@
   "Pdf": {
     "title": "Person brief",
     "fictionalBanner": "FICTIONAL DEMO DATA — every person, organisation, source and contact in this brief is invented.",
-    "private": "Private — prepared for professional meeting preparation",
+    "private": "Private — prepared for a professional meeting",
     "page": "Page {page} of {total}",
     "researched": "Researched {date}",
     "snapshot": "Snapshot {version} of {total}",
@@ -855,6 +887,63 @@
     "asOf": "stated as of {date}",
     "translated": "translated",
     "translatedFrom": "translated; original: {original}",
-    "dateUnknown": "dates not stated"
+    "dateUnknown": "dates not stated",
+    "asOfAccessed": "current on an undated page read {date}"
+  },
+  "Meta": {
+    "appDescription": "Private professional research workspace for meeting preparation.",
+    "signIn": "Sign in",
+    "setup": "Setup",
+    "activity": "Activity",
+    "researchRun": "Research run",
+    "changes": "What changed?",
+    "report": "Report an issue",
+    "profiles": "Profiles",
+    "research": "Research",
+    "dataUse": "Data use & privacy",
+    "settings": "Settings",
+    "fictionalSource": "Fictional source"
+  },
+  "Gaps": {
+    "no_education": "No published education history was found.",
+    "no_contacts": "No public business contact found.",
+    "no_accounts": "No public social account could be confirmed from an official or self-published link.",
+    "no_connections": "No documented professional relationships were found.",
+    "no_direct_news": "No news coverage directly about this person was found.",
+    "no_role": "No professional role could be evidenced.",
+    "role_not_current": "No recent source confirms the latest role as current.",
+    "search_failed": "The {category} search did not complete; this section may be incomplete.",
+    "budget_limited": "Some retrieved sources were not analysed because the research budget was reached."
+  },
+  "Examples": {
+    "rich": {
+      "label": "Rich profile",
+      "scenario": "Two people share this name, but only one is linked to the company you entered, so she is selected automatically and a full profile is built."
+    },
+    "cyrillic": {
+      "label": "Name in Cyrillic",
+      "scenario": "A Cyrillic search finds two different people with this name, so you choose which one to research."
+    },
+    "ambiguous": {
+      "label": "Ambiguous name",
+      "scenario": "Three different professionals share this name; compare their cards and pick the right one."
+    },
+    "sparse": {
+      "label": "Sparse record",
+      "scenario": "Only one public source exists, so the profile is short and states clearly what was not found."
+    },
+    "failure": {
+      "label": "Provider failure",
+      "scenario": "News searches time out on the first run, giving a partial profile that a retry completes."
+    },
+    "profileUrl": {
+      "label": "Profile URL match",
+      "scenario": "A known profile page identifies the person directly, so no identity choice is needed."
+    }
+  },
+  "Uncertainty": {
+    "outdated": "Described as current in a source dated {date}; this may no longer be accurate.",
+    "endBeforeStart": "The stated end date is earlier than the start date.",
+    "approximateStart": "The start date is approximate in the source."
   }
 }

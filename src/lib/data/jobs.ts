@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, gt, inArray, sql } from "drizzle-orm";
 import type { Database } from "@/lib/db/client";
-import { candidateIdentities, jobDocuments, jobEvents, jobSteps, researchJobs, workerHeartbeats } from "@/lib/db/schema";
+import { candidateIdentities, jobDocuments, jobEvents, jobSteps, researchJobs, workerHeartbeats, type IdentityResolution } from "@/lib/db/schema";
 import { STAGES, type JobStatus, type Stage } from "@/lib/domain/types";
 
 export type StageView = { stage: Stage; status: "pending" | "running" | "completed" | "failed" | "skipped" | "partial" };
@@ -18,7 +18,7 @@ export type JobView = {
   snapshotId: string | null;
   parentJobId: string | null;
   retriedById: string | null;
-  identityResolution: { method: string; reason: string; decidedAt: string } | null;
+  identityResolution: IdentityResolution | null;
   selectedCandidateId: string | null;
   errorCode: string | null;
   errorMessage: string | null;

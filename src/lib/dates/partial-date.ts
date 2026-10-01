@@ -1,3 +1,4 @@
+import { AZ_MONTHS_SHORT, isAzerbaijani } from "@/lib/i18n/format-date";
 import type { DatePrecision, PartialDate } from "@/lib/domain/types";
 
 /**
@@ -103,16 +104,22 @@ export function formatPartialDate(
 ): string {
   if (!date) return options.unknownLabel ?? "";
   const d = partialDateStart(date);
+  const az = isAzerbaijani(locale);
   let text: string;
   if (date.day) {
-    text = new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" }).format(d);
+    text = az
+      ? `${date.day} ${AZ_MONTHS_SHORT[(date.month ?? 1) - 1]} ${date.year}`
+      : new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" }).format(d);
   } else if (date.month) {
-    text = new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", timeZone: "UTC" }).format(d);
+    text = az ? `${AZ_MONTHS_SHORT[date.month - 1]} ${date.year}` : new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", timeZone: "UTC" }).format(d);
   } else {
     text = String(date.year);
   }
-  return date.approximate ? `c. ${text}` : text;
+  return date.approximate ? `${APPROXIMATE[locale.slice(0, 2).toLowerCase()] ?? "c."} ${text}` : text;
 }
+
+/** "circa" prefix for approximate dates. */
+const APPROXIMATE: Record<string, string> = { en: "c.", az: "təq.", ru: "ок." };
 
 export function formatPartialDateString(input: string | null | undefined, locale: string, unknownLabel = ""): string {
   return formatPartialDate(parsePartialDate(input), locale, { unknownLabel });

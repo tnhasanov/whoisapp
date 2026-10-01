@@ -1,8 +1,9 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Dialog } from "radix-ui";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -16,7 +17,7 @@ export function Sheet({
   description,
   children,
   footer,
-  closeLabel = "Close",
+  closeLabel,
   width = "md",
 }: {
   open: boolean;
@@ -28,11 +29,21 @@ export function Sheet({
   closeLabel?: string;
   width?: "md" | "lg";
 }) {
+  const tCommon = useTranslations("Common");
+  // Opened programmatically (no Dialog.Trigger), so Radix has no trigger to refocus on close.
+  const returnFocus = useRef<HTMLElement | null>(null);
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-[rgb(10_14_22/0.32)] backdrop-blur-[1px] data-[state=open]:animate-in data-[state=open]:fade-in" />
+        <Dialog.Overlay className="fixed inset-0 z-40 bg-[rgb(10_14_22/0.32)] backdrop-blur-[1px] data-[state=open]:fade-in" />
         <Dialog.Content
+          onOpenAutoFocus={() => {
+            returnFocus.current = document.activeElement instanceof HTMLElement && document.activeElement !== document.body ? document.activeElement : null;
+          }}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            if (returnFocus.current?.isConnected) returnFocus.current.focus();
+          }}
           className={cn(
             "fixed inset-0 z-50 flex flex-col bg-surface shadow-drawer outline-none",
             "sm:inset-y-0 sm:left-auto sm:right-0 sm:border-l sm:border-line",
@@ -47,7 +58,7 @@ export function Sheet({
             </div>
             <Dialog.Close
               className="-mr-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-muted hover:bg-sunken hover:text-ink"
-              aria-label={closeLabel}
+              aria-label={closeLabel ?? tCommon("close")}
             >
               <X className="h-5 w-5" aria-hidden />
             </Dialog.Close>

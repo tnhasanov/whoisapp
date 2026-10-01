@@ -3,6 +3,7 @@ import type { FixtureExample } from "@/fixtures/types";
 /** Example searches shown on the demo search screen. Every name here is fictional. */
 export const FIXTURE_EXAMPLES: FixtureExample[] = [
   {
+    key: "rich",
     label: "Rich profile",
     fullName: "Elnara Gasimova",
     company: "Caspian Lantern Analytics",
@@ -10,26 +11,31 @@ export const FIXTURE_EXAMPLES: FixtureExample[] = [
       "Two people share this name, but only one is linked to the company you entered, so she is selected automatically and a full profile is built.",
   },
   {
+    key: "cyrillic",
     label: "Name in Cyrillic",
     fullName: "Эльнара Гасымова",
     scenario: "A Cyrillic search finds two different people with this name, so you choose which one to research.",
   },
   {
+    key: "ambiguous",
     label: "Ambiguous name",
     fullName: "Tural Mammadov",
     scenario: "Three different professionals share this name; compare their cards and pick the right one.",
   },
   {
+    key: "sparse",
     label: "Sparse record",
     fullName: "Sevinj Abbasli",
     scenario: "Only one public source exists, so the profile is short and states clearly what was not found.",
   },
   {
+    key: "failure",
     label: "Provider failure",
     fullName: "Javid Nuriyev",
     scenario: "News searches time out on the first run, giving a partial profile that a retry completes.",
   },
   {
+    key: "profileUrl",
     label: "Profile URL match",
     fullName: "Elnara Gasimova",
     profileUrl: "https://caspianlantern.example/team/elnara-gasimova",

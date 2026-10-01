@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import type { Viewer } from "@/lib/auth/session";
 import { DemoBanner } from "./demo-banner";
@@ -5,6 +6,7 @@ import { MobileBottomNav, MobileTopBar } from "./mobile-nav";
 import { Sidebar } from "./sidebar";
 
 export function AppShell({ viewer, children }: { viewer: Viewer; children: ReactNode }) {
+  const t = useTranslations("Common");
   const isOwner = viewer.role === "owner";
   return (
     <div className="flex min-h-dvh">
@@ -12,7 +14,7 @@ export function AppShell({ viewer, children }: { viewer: Viewer; children: React
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:shadow-md"
       >
-        Skip to content
+        {t("skipToContent")}
       </a>
       <Sidebar workspace={viewer.workspace} isOwner={isOwner} name={viewer.name} email={viewer.email} />
       <div className="flex min-w-0 flex-1 flex-col">

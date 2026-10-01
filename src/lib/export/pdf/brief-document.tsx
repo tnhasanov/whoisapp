@@ -91,7 +91,7 @@ const s = StyleSheet.create({
   rowBody: { flex: 1 },
   rowTitle: { fontWeight: 600, fontSize: 10 },
   rowSub: { color: "#2b3445" },
-  flag: { fontSize: 7.5, color: "#9a6512", marginTop: 1 },
+  flag: { fontSize: 7.5, color: "#8a5a10", marginTop: 1 },
   note: { fontSize: 8, color: MUTED, marginTop: 4 },
   list: { marginTop: 2 },
   bullet: { flexDirection: "row", marginBottom: 3 },

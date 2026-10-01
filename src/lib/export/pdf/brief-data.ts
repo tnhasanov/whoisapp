@@ -1,5 +1,8 @@
 import { formatPartialDate, formatPartialDateString, partialDateSortKey } from "@/lib/dates/partial-date";
 import type { ClaimView, ProfileView } from "@/lib/data/profiles";
+import { formatDateTime } from "@/lib/i18n/format-date";
+import { gapText } from "@/lib/i18n/gaps";
+import { identityReason } from "@/lib/i18n/identity";
 import type { BriefData, BriefRow } from "./brief-document";
 
 type T = (key: string, values?: Record<string, string | number>) => string;
@@ -11,6 +14,9 @@ export type BriefTranslators = {
   accounts: T;
   connections: T;
   news: T;
+  gaps: T;
+  categories: T;
+  identity: T;
 };
 
 /** Build print-ready data for one snapshot. Dates are formatted in the owner's locale and time zone. */
@@ -21,8 +27,8 @@ export function buildBriefData(
   const { locale, timeZone, t } = options;
   const { profile, snapshot } = view;
   const fictional = profile.workspace === "demo";
-  const dateTime = (d: Date) => new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short", timeZone }).format(d);
-  const date = (d: Date) => new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone }).format(d);
+  const dateTime = (d: Date) => formatDateTime(d, locale, timeZone, "dateTime");
+  const date = (d: Date) => formatDateTime(d, locale, timeZone, "date");
   const number = new Map(view.sources.map((s) => [s.id, Number(s.sourceKey.replace(/^S/, ""))]));
   const refsOf = (ids: (string | null | undefined)[]) => [...new Set(ids.map((id) => (id ? number.get(id) : undefined)).filter((n): n is number => Boolean(n)))].sort((a, b) => a - b);
   const claimRefs = (c: ClaimView) => refsOf(c.evidence.map((e) => e.sourceId));
@@ -37,7 +43,9 @@ export function buildBriefData(
     if (start && end) return `${start} – ${end}`;
     if (start) return `${start} – ${c.temporal.currency === "stated_current" ? t.pdf("present") : "?"}`;
     if (end) return t.pdf("until", { date: end });
-    if (c.temporal.currency === "stated_current" && c.temporal.asOf) return t.pdf("asOf", { date: formatPartialDateString(c.temporal.asOf, locale) });
+    if (c.temporal.currency === "stated_current" && c.temporal.asOf) {
+      return t.pdf(c.temporal.asOfBasis === "accessed" ? "asOfAccessed" : "asOf", { date: formatPartialDateString(c.temporal.asOf, locale) });
+    }
     return t.pdf("dateUnknown");
   };
   const flags = (c: ClaimView) => {
@@ -105,7 +113,7 @@ export function buildBriefData(
       snapshot: t.pdf("snapshot", { version: snapshot.version, total: view.snapshots.length }),
       sources: t.pdf("sources", { count: view.sources.length }),
       partial: snapshot.status === "partial",
-      identity: snapshot.identity.resolution.reason,
+      identity: identityReason(snapshot.identity.resolution, t.identity),
     },
     summary: snapshot.overview.summary.map((p) => ({
       text: p.text,
@@ -163,7 +171,7 @@ export function buildBriefData(
         refs: refsOf(story.items.map((i) => i.sourceId)),
       };
     }),
-    gaps: snapshot.overview.gaps.map((g) => g.text),
+    gaps: snapshot.overview.gaps.map((g) => gapText(g, t.gaps, t.categories)),
     questions: snapshot.overview.questions.map((q) => q.question),
     sources: view.sources
       .filter((s) => s.aboutSubject === "yes" || referenced.has(s.id))

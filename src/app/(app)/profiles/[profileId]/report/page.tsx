@@ -1,6 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { PageContainer, PageHeader } from "@/components/app-shell/app-shell";
 import { ReportForm } from "@/components/profile/report-form";
 import { Badge } from "@/components/ui/badge";
@@ -8,8 +8,11 @@ import { Card } from "@/components/ui/card";
 import { loadProfile } from "@/lib/data/profile-loader";
 import { listIssues } from "@/lib/data/profiles";
 import { getDb } from "@/lib/db/client";
+import { getDateFormat } from "@/lib/i18n/date-format-server";
 
-export const metadata = { title: "Report an issue" };
+export async function generateMetadata() {
+  return { title: (await getTranslations("Meta"))("report") };
+}
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ profileId: string }>; searchParams: Promise<{ snapshot?: string; claim?: string }> };
@@ -19,7 +22,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
   const sp = await searchParams;
   const { viewer, view } = await loadProfile(profileId, sp.snapshot ?? null);
   const t = await getTranslations("Report");
-  const format = await getFormatter();
+  const fmtDate = await getDateFormat();
   const claim = sp.claim ? view.claims.find((c) => c.id === sp.claim) : null;
   const issues = await listIssues(getDb(), viewer.userId, view.profile.id);
   return (
@@ -43,7 +46,7 @@ export default async function ReportPage({ params, searchParams }: Props) {
               <li key={i.id} className="text-[13px]">
                 <div className="flex items-center gap-2">
                   <Badge tone="warn">{t(`categories.${i.category}`)}</Badge>
-                  <span className="text-xs text-muted">{format.dateTime(i.createdAt, { dateStyle: "medium" })}</span>
+                  <span className="text-xs text-muted">{fmtDate(i.createdAt, "date")}</span>
                 </div>
                 <p className="mt-1 whitespace-pre-wrap text-ink-2">{i.message}</p>
               </li>

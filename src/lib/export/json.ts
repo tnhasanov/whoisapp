@@ -52,6 +52,7 @@ export function buildJsonExport(view: ProfileView, options: { includeNotes: bool
       period: { start: partialDateToString(c.temporal.start), end: partialDateToString(c.temporal.end) },
       currency: c.temporal.currency,
       statedCurrentAsOf: c.temporal.asOf,
+      statedCurrentAsOfBasis: c.temporal.asOf ? (c.temporal.asOfBasis ?? "published") : null,
       possiblyOutdated: c.temporal.possiblyOutdated,
       uncertaintyNote: c.uncertaintyNote,
       conflictGroup: c.conflictGroup,

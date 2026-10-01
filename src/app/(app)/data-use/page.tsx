@@ -3,7 +3,9 @@ import { PageContainer, PageHeader } from "@/components/app-shell/app-shell";
 import { Card } from "@/components/ui/card";
 import { getEnv } from "@/lib/env";
 
-export const metadata = { title: "Data use & privacy" };
+export async function generateMetadata() {
+  return { title: (await getTranslations("Meta"))("dataUse") };
+}
 
 export default async function DataUsePage() {
   const t = await getTranslations("DataUse");

@@ -1,6 +1,6 @@
 import { Activity } from "lucide-react";
 import Link from "next/link";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { PageContainer, PageHeader } from "@/components/app-shell/app-shell";
 import { DeleteJobButton } from "@/components/activity/delete-job-button";
 import { JobStatusBadge } from "@/components/research/status-badge";
@@ -11,8 +11,11 @@ import { EmptyState } from "@/components/ui/feedback";
 import { requireViewer } from "@/lib/auth/session";
 import { listJobs } from "@/lib/data/jobs";
 import { getDb } from "@/lib/db/client";
+import { getDateFormat } from "@/lib/i18n/date-format-server";
 
-export const metadata = { title: "Activity" };
+export async function generateMetadata() {
+  return { title: (await getTranslations("Meta"))("activity") };
+}
 export const dynamic = "force-dynamic";
 
 const TERMINAL = new Set(["completed", "partial", "failed", "cancelled"]);
@@ -20,14 +23,14 @@ const TERMINAL = new Set(["completed", "partial", "failed", "cancelled"]);
 export default async function ActivityPage() {
   const viewer = await requireViewer();
   const t = await getTranslations("Activity");
-  const format = await getFormatter();
+  const fmtDate = await getDateFormat();
   const jobs = await listJobs(getDb(), viewer.userId, viewer.workspace, 100);
   return (
     <PageContainer>
       <PageHeader title={t("title")} description={t("subtitle")} />
       <div className="mt-6">
         {jobs.length === 0 ? (
-          <EmptyState icon={<Activity className="h-6 w-6" aria-hidden />} title={t("empty")} action={<ButtonLink href="/search">{t("open")}</ButtonLink>} />
+          <EmptyState icon={<Activity className="h-6 w-6" aria-hidden />} title={t("empty")} action={<ButtonLink href="/search">{t("startResearch")}</ButtonLink>} />
         ) : (
           <Card>
             <ul className="divide-y divide-line">
@@ -39,7 +42,7 @@ export default async function ActivityPage() {
                       {j.company ? <span className="text-sm text-muted">· {j.company}</span> : null}
                     </span>
                     <span className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted">
-                      <span>{format.dateTime(new Date(j.createdAt), { dateStyle: "medium", timeStyle: "short" })}</span>
+                      <span>{fmtDate(j.createdAt, "dateTime")}</span>
                       <Badge tone="outline">{t(`kinds.${j.kind}` as "kinds.search")}</Badge>
                       {j.outcome === "no_candidates" || j.outcome === "refined" ? <Badge tone="outline">{t(`outcomes.${j.outcome}`)}</Badge> : null}
                     </span>
