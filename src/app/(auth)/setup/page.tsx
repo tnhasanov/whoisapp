@@ -4,7 +4,7 @@ import { SetupForm } from "@/components/auth/setup-form";
 import { Card } from "@/components/ui/card";
 import { Callout } from "@/components/ui/feedback";
 import { ownerExists } from "@/lib/auth/owner";
-import { getEnv } from "@/lib/env";
+import { MIN_SETUP_TOKEN_LENGTH, setupTokenStatus } from "@/lib/env";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("Meta"))("setup") };
@@ -12,8 +12,10 @@ export async function generateMetadata() {
 
 export default async function SetupPage() {
   const t = await getTranslations("Setup");
+  const tAuth = await getTranslations("Auth");
   const exists = await ownerExists();
-  const tokenConfigured = Boolean(getEnv().OWNER_SETUP_TOKEN);
+  const tokenStatus = setupTokenStatus();
+  const tokenConfigured = tokenStatus === "ok";
   return (
     <div className="w-full max-w-[460px]">
       <Card className="p-6 sm:p-8">
@@ -21,12 +23,12 @@ export default async function SetupPage() {
         {exists ? (
           <Callout className="mt-5" title={t("alreadyDone")}>
             <Link className="font-medium text-accent hover:underline" href="/sign-in">
-              Sign in
+              {tAuth("submit")}
             </Link>
           </Callout>
         ) : !tokenConfigured ? (
           <Callout tone="warn" className="mt-5">
-            <span className="break-anywhere">{t("noToken")}</span>
+            <span className="break-anywhere">{tokenStatus === "too_short" ? t("tokenTooShort", { min: MIN_SETUP_TOKEN_LENGTH }) : t("noToken")}</span>
           </Callout>
         ) : (
           <>

@@ -104,7 +104,8 @@
       "password_long": "Şifrə ən çoxu 128 simvoldan ibarət olmalıdır.",
       "email_taken": "Bu e-poçt ünvanı ilə istifadəçi artıq mövcuddur.",
       "failed": "Sahib hesabını yaratmaq mümkün olmadı."
-    }
+    },
+    "tokenTooShort": "Quraşdırma tokeni (OWNER_SETUP_TOKEN) çox qısadır. Ən azı {min} simvol istifadə edin, onu hostinq parametrlərində saxlayın və tətbiqi yenidən başladın."
   },
   "Search": {
     "title": "Şəxs haqqında araşdırma",
@@ -294,7 +295,8 @@
     "tagPlaceholder": "Yeni teq",
     "removeTag": "{name} teqini silin",
     "demoFictional": "Demo · uydurma",
-    "partialBadge": "Qismən"
+    "partialBadge": "Qismən",
+    "sharePdf": "PDF-i paylaşın…"
   },
   "Overview": {
     "summary": "Xülasə",
@@ -944,5 +946,19 @@
     "outdated": "{date} tarixli mənbədə cari kimi təsvir olunub; bu artıq dəqiq olmaya bilər.",
     "endBeforeStart": "Göstərilən bitmə tarixi başlama tarixindən əvvəldir.",
     "approximateStart": "Başlama tarixi mənbədə təqribi göstərilib."
+  },
+  "Install": {
+    "title": "PersonBrief telefonunuzda",
+    "body": "PersonBrief-i quraşdırın ki, onu digər tətbiqlər kimi ana ekrandan tam ekranda açasınız.",
+    "button": "Tətbiqi quraşdırın",
+    "installed": "Siz quraşdırılmış tətbiqdən istifadə edirsiniz.",
+    "iosStep1": "Safari-də “Paylaş” düyməsinə toxunun.",
+    "iosStep2": "“Ana ekrana əlavə et”, sonra “Əlavə et” seçin.",
+    "android": "Brauzer menyusunu açın və “Tətbiqi quraşdır” və ya “Ana ekrana əlavə et” seçin.",
+    "desktop": "PersonBrief-i ana ekrana əlavə etmək üçün bu səhifəni telefonunuzda açın. Kompüterdə Chrome və ya Edge-də ünvan sətrindəki “Quraşdır” düyməsindən istifadə edin.",
+    "hintTitle": "PersonBrief-dən tətbiq kimi istifadə edin",
+    "hintBody": "Ana ekrandan tam ekran istifadə üçün onu quraşdırın.",
+    "hintIos": "“Paylaş”, sonra “Ana ekrana əlavə et” seçin.",
+    "dismiss": "Bağlayın"
   }
 }

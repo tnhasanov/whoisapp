@@ -104,7 +104,8 @@
       "password_long": "Password must be at most 128 characters.",
       "email_taken": "A user with this email already exists.",
       "failed": "Could not create the owner account."
-    }
+    },
+    "tokenTooShort": "The setup token (OWNER_SETUP_TOKEN) is too short. Use at least {min} characters, save it in your hosting settings, and restart the app."
   },
   "Search": {
     "title": "Research a person",
@@ -294,7 +295,8 @@
     "tagPlaceholder": "New tag",
     "removeTag": "Remove tag {name}",
     "demoFictional": "Demo · fictional",
-    "partialBadge": "Partial"
+    "partialBadge": "Partial",
+    "sharePdf": "Share PDF…"
   },
   "Overview": {
     "summary": "Summary",
@@ -944,5 +946,19 @@
     "outdated": "Described as current in a source dated {date}; this may no longer be accurate.",
     "endBeforeStart": "The stated end date is earlier than the start date.",
     "approximateStart": "The start date is approximate in the source."
+  },
+  "Install": {
+    "title": "PersonBrief on your phone",
+    "body": "Install PersonBrief to open it full-screen from your home screen, like any other app.",
+    "button": "Install app",
+    "installed": "You are using the installed app.",
+    "iosStep1": "In Safari, tap the Share button.",
+    "iosStep2": "Choose “Add to Home Screen”, then “Add”.",
+    "android": "Open the browser menu and choose “Install app” or “Add to Home screen”.",
+    "desktop": "Open this page on your phone to add PersonBrief to your home screen. In Chrome or Edge on a computer, use “Install” in the address bar.",
+    "hintTitle": "Use PersonBrief as an app",
+    "hintBody": "Install it for a full-screen experience from your home screen.",
+    "hintIos": "Tap Share, then “Add to Home Screen”.",
+    "dismiss": "Dismiss"
   }
 }

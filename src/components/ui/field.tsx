@@ -12,15 +12,16 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
   { className, inputSize = "md", ...props },
   ref,
 ) {
-  return <input ref={ref} className={cn(control, inputSize === "lg" ? "h-12 text-base" : "h-10 text-sm", className)} {...props} />;
+  // 16px text on phones: iOS zooms into smaller fields.
+  return <input ref={ref} className={cn(control, inputSize === "lg" ? "h-12 text-base" : "h-11 text-base sm:h-10 sm:text-sm", className)} {...props} />;
 });
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(function Textarea({ className, ...props }, ref) {
-  return <textarea ref={ref} className={cn(control, "min-h-24 py-2 text-sm leading-relaxed", className)} {...props} />;
+  return <textarea ref={ref} className={cn(control, "min-h-24 py-2 text-base leading-relaxed sm:text-sm", className)} {...props} />;
 });
 
 export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(function Select({ className, ...props }, ref) {
-  return <select ref={ref} className={cn(control, "h-10 text-sm pr-8", className)} {...props} />;
+  return <select ref={ref} className={cn(control, "h-11 pr-8 text-base sm:h-10 sm:text-sm", className)} {...props} />;
 });
 
 export function FieldHint({ id, children }: { id?: string; children: ReactNode }) {

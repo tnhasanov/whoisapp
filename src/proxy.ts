@@ -6,7 +6,21 @@ import { NextResponse, type NextRequest } from "next/server";
  * page, action, route handler and export still verifies the session and
  * ownership on the server — this check is not authorisation.
  */
-const PUBLIC_PREFIXES = ["/sign-in", "/setup", "/api/health", "/robots.txt", "/favicon.ico", "/icon"];
+const PUBLIC_PREFIXES = [
+  "/sign-in",
+  "/setup",
+  "/api/health",
+  "/robots.txt",
+  "/favicon.ico",
+  "/icon",
+  "/apple-icon",
+  // Installable-app files: browsers fetch them without the session cookie.
+  "/manifest.webmanifest",
+  "/sw.js",
+  "/offline.html",
+  "/icons",
+  "/splash",
+];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

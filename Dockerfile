@@ -13,7 +13,7 @@ RUN npm ci
 FROM deps AS build
 COPY . .
 # The build needs no secrets; runtime configuration comes from the environment.
-RUN npm run build
+RUN npm run build && npm run build:worker
 
 FROM base AS runtime
 ENV NODE_ENV=production \
@@ -29,7 +29,8 @@ COPY --from=build --chown=personbrief:personbrief /app/messages ./messages
 COPY --from=build --chown=personbrief:personbrief /app/assets ./assets
 COPY --from=build --chown=personbrief:personbrief /app/drizzle ./drizzle
 COPY --from=build --chown=personbrief:personbrief /app/scripts ./scripts
-# The worker runs from source with tsx.
+COPY --from=build --chown=personbrief:personbrief /app/dist ./dist
+# Source is kept for the command-line scripts (migrations, owner creation), which run with tsx.
 COPY --from=build --chown=personbrief:personbrief /app/src ./src
 USER personbrief
 EXPOSE 3000

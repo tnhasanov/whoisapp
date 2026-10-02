@@ -141,7 +141,12 @@ test("phone and narrow phone layouts", async ({ browser }) => {
     ["phone", PHONE],
     ["narrow", NARROW],
   ] as const) {
-    const page = await ownerPage(browser, viewport, { isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+    const page = await ownerPage(browser, viewport, {
+      isMobile: true,
+      hasTouch: true,
+      deviceScaleFactor: 2,
+      userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Mobile/15E148 Safari/604.1",
+    });
     await page.goto("/search");
     await shot(page, `${label}-01-search`, false);
     if (!richProfileUrl) continue;
@@ -163,6 +168,15 @@ test("phone and narrow phone layouts", async ({ browser }) => {
     await page.goto(`${richProfileUrl}/news`);
     await page.getByRole("heading", { name: "Coverage" }).scrollIntoViewIfNeeded();
     await shot(page, `${label}-07-news`, false);
+    if (label === "phone") {
+      await page.goto("/profiles");
+      await shot(page, `${label}-08-library`, false);
+      await page.goto("/settings#app");
+      await page.getByRole("heading", { name: "PersonBrief on your phone" }).scrollIntoViewIfNeeded();
+      await shot(page, `${label}-09-install-app`, false);
+      await page.goto("/offline.html");
+      await shot(page, `${label}-10-offline`, false);
+    }
   }
 });
 

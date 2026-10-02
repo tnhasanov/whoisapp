@@ -3,6 +3,8 @@ import { expect, test, type Page } from "@playwright/test";
 import { deleteProfile, OWNER_STATE, runExample, waitForProfile } from "./support";
 
 async function expectNoSeriousViolations(page: Page, label: string) {
+  // Let the screen's entrance animation finish so colours are measured at full opacity.
+  await page.waitForTimeout(400);
   const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
   const serious = results.violations
     .filter((v) => v.impact === "serious" || v.impact === "critical")

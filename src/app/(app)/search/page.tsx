@@ -2,6 +2,7 @@ import { Clock } from "lucide-react";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { PageContainer, PageHeader } from "@/components/app-shell/app-shell";
+import { InstallAppHint } from "@/components/pwa/install-app";
 import { ExampleList } from "@/components/research/example-list";
 import { SearchForm } from "@/components/research/search-form";
 import { JobStatusBadge } from "@/components/research/status-badge";
@@ -61,6 +62,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
               disabled={liveBlocked}
             />
           </Card>
+          <InstallAppHint />
         </div>
         <aside className="space-y-6">
           <Card className="p-5">

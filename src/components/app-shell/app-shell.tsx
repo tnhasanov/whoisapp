@@ -20,7 +20,8 @@ export function AppShell({ viewer, children }: { viewer: Viewer; children: React
       <div className="flex min-w-0 flex-1 flex-col">
         <MobileTopBar workspace={viewer.workspace} isOwner={isOwner} />
         {viewer.workspace === "demo" ? <DemoBanner /> : null}
-        <main id="main" className="flex-1 pb-24 lg:pb-12" tabIndex={-1}>
+        {/* Bottom padding clears the phone tab bar and the home indicator. */}
+        <main id="main" className="flex-1 pb-[calc(6.5rem+env(safe-area-inset-bottom))] lg:pb-12" tabIndex={-1}>
           {children}
         </main>
       </div>

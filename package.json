@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "concurrently -k -n web,worker -c blue,magenta \"next dev\" \"npm:worker:dev\"",
     "dev:web": "next dev",
-    "worker": "tsx src/worker/index.ts",
+    "worker": "node --enable-source-maps dist/worker.cjs",
     "worker:dev": "tsx watch --clear-screen=false src/worker/index.ts",
+    "worker:src": "tsx src/worker/index.ts",
     "build": "next build",
+    "build:worker": "esbuild src/worker/index.ts --bundle --platform=node --target=node22 --format=cjs --packages=external --sourcemap --outfile=dist/worker.cjs",
     "start": "next start -H 0.0.0.0",
     "start:all": "concurrently -k -n web,worker \"next start -H 0.0.0.0\" \"npm:worker\"",
     "lint": "eslint",
@@ -16,12 +18,12 @@
     "test:unit": "vitest run --project unit",
     "test:integration": "vitest run --project integration",
     "test:e2e": "playwright test",
+    "e2e:serve": "concurrently -k -n web,worker \"next start -p 3100\" \"npm:worker\"",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:migrate:test": "tsx scripts/migrate.ts --test",
     "owner:create": "tsx scripts/create-owner.ts",
-    "fixtures:check": "tsx scripts/check-fixtures.ts",
-    "e2e:serve": "concurrently -k -n web,worker \"next start -p 3100\" \"npm:worker\""
+    "fixtures:check": "tsx scripts/check-fixtures.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",
@@ -59,6 +61,7 @@
     "@types/react-dom": "^19",
     "dotenv": "^18.0.5",
     "drizzle-kit": "^0.31.11",
+    "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "tailwindcss": "^4",

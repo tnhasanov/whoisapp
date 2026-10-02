@@ -26,7 +26,8 @@ guessed data.
 | Durable job runner (leases, fencing, heartbeats, checkpoints, retries, cancellation, stale-job handling) | Implemented, integration-tested |
 | Fictional demo workspace and guest demo | Implemented, tested |
 | Live research with Tavily + Anthropic | Implemented and unit-tested against the SDKs; **not live-tested** (no keys in the build environment) |
-| Hosted deployment | Docker configuration provided; **not deployed** (no authorised hosting) |
+| Installable phone app (home screen, launch screens, offline screen, bottom sheets, share sheet) | Implemented, browser-tested on phone viewports |
+| Hosted deployment | Render Blueprint and Docker configuration provided; **not deployed yet** (needs your Render account) |
 
 See [docs/implementation-status.md](docs/implementation-status.md) for the
 detailed status and [docs/decisions.md](docs/decisions.md) for the decision log.
@@ -108,18 +109,32 @@ npm run fixtures:check                          # validates the fictional world
 End-to-end (Playwright; uses a dedicated database whose research data is reset):
 
 ```bash
-npm run build
+npm run build && npm run build:worker
 DATABASE_URL=$E2E_DATABASE_URL APP_URL=http://localhost:3100 FIXTURE_LATENCY_MS=150 npm run e2e:serve &
 E2E_DATABASE_URL=… npm run test:e2e             # also writes docs/screenshots/*
 ```
 
 ## Deployment
 
-The app needs a long-running Node process for the web app **and** one for the
-worker, plus PostgreSQL. `docker compose up --build -d` runs all of it; see
-[docs/deployment.md](docs/deployment.md) for hosting notes, HTTPS, backups and
-the full list of settings. Serverless-only hosts can run the web app, but the
-worker must run on a host that keeps a process alive.
+**Easiest: Render.** `render.yaml` describes the website, the research worker
+and the database; Render → New → Blueprint creates all three. Follow
+[docs/deploy-render.md](docs/deploy-render.md) — it is written step by step.
+
+Elsewhere, the app needs a long-running Node process for the web app **and**
+one for the worker, plus PostgreSQL. `docker compose up --build -d` runs all of
+it; see [docs/deployment.md](docs/deployment.md) for hosting notes, HTTPS,
+backups and the full list of settings. Serverless-only hosts can run the web
+app, but the worker must run on a host that keeps a process alive.
+
+## On your phone
+
+PersonBrief is an installable web app: add it to the home screen (Safari →
+Share → Add to Home Screen; Chrome → Install app) and it opens full-screen
+with its own icon and launch screen. On phones the evidence opens as a bottom
+sheet you can swipe away, nested screens have a back button, and PDFs can be
+shared through the system share sheet. A small service worker keeps launches
+fast and shows an offline screen; it stores only the app's own files, never
+pages or research data.
 
 ## Project layout
 

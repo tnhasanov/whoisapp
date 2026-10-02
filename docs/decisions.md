@@ -86,3 +86,15 @@ Short records of the choices that shape PersonBrief. Newest last.
 21. **No scoring.** No personality, trust, credit or hiring assessments;
     information gaps are worded neutrally and missing information is never a
     negative signal.
+22. **Render as the first host.** One Blueprint file creates the website,
+    worker and database; Frankfurt is the closest Render region to Baku. The
+    worker is bundled to plain JavaScript with esbuild for production.
+23. **Phone app as an installable web app (PWA), not app-store builds.** It
+    installs from the browser on iPhone and Android with no store review or
+    developer accounts, and every release reaches it immediately. Native store
+    apps (for example a Capacitor wrapper) remain possible later and would need
+    Apple and Google developer accounts.
+24. **The service worker never stores private data.** It caches only hashed
+    build assets, icons and a static offline screen; pages, API responses and
+    exports always come from the network. The cache is named after the build,
+    so each release replaces it.

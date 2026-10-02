@@ -1,0 +1,88 @@
+# Render Blueprint for PersonBrief — website, research worker and PostgreSQL.
+#
+# Render dashboard → New → Blueprint → choose this repository and branch.
+# Render asks for the values marked `sync: false`:
+#   OWNER_SETUP_TOKEN   a long phrase you make up; you type it once on /setup
+#   TAVILY_API_KEY      optional now — needed only for live research
+#   ANTHROPIC_API_KEY   optional now — needed only for live research
+# Everything else (database, session secret, public URL) is set automatically.
+#
+# Plans: two "starter" services (always on, 512 MB each) and a "basic-256mb"
+# database. The website and worker run separately because together they need
+# more memory than one 512 MB instance during PDF exports.
+
+databases:
+  - name: personbrief-db
+    databaseName: personbrief
+    user: personbrief
+    plan: basic-256mb
+    region: frankfurt
+    postgresMajorVersion: "16"
+    # No external connections: only services in this workspace can reach it.
+    ipAllowList: []
+
+services:
+  - type: web
+    name: personbrief
+    runtime: node
+    plan: starter
+    region: frankfurt
+    buildCommand: npm ci --include=dev && npm run build
+    # Applies new database migrations before each release goes live.
+    preDeployCommand: npm run db:migrate
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Keeps memory within the 512 MB instance.
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=320
+      - key: DATABASE_URL
+        fromDatabase:
+          name: personbrief-db
+          property: connectionString
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: OWNER_SETUP_TOKEN
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: PUBLIC_DEMO_ENABLED
+        value: "false"
+
+  - type: worker
+    name: personbrief-worker
+    runtime: node
+    plan: starter
+    region: frankfurt
+    buildCommand: npm ci --include=dev && npm run build:worker
+    preDeployCommand: npm run db:migrate
+    startCommand: npm run worker
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=256
+      - key: DATABASE_URL
+        fromDatabase:
+          name: personbrief-db
+          property: connectionString
+      # The worker never checks sign-ins; it only needs a valid value.
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      # Research keys are copied from the website service (redeploy the worker after changing them).
+      - key: TAVILY_API_KEY
+        fromService:
+          type: web
+          name: personbrief
+          envVarKey: TAVILY_API_KEY
+      - key: ANTHROPIC_API_KEY
+        fromService:
+          type: web
+          name: personbrief
+          envVarKey: ANTHROPIC_API_KEY

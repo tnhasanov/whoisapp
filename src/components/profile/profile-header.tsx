@@ -18,6 +18,25 @@ import { identityReason } from "@/lib/i18n/identity";
 import { initials } from "@/lib/names";
 import { useDateFormat } from "@/lib/i18n/use-date-format";
 
+/** On phones, hand the PDF to the system share sheet (save to Files, AirDrop, mail…). */
+async function sharePdf(href: string, title: string): Promise<void> {
+  const response = await fetch(href, { credentials: "same-origin" });
+  if (!response.ok) throw new Error(`export failed: ${response.status}`);
+  const name = /filename="([^"]+)"/.exec(response.headers.get("content-disposition") ?? "")?.[1] ?? "personbrief.pdf";
+  const file = new File([await response.blob()], name, { type: "application/pdf" });
+  if (navigator.canShare?.({ files: [file] })) {
+    await navigator.share({ files: [file], title }).catch((error: unknown) => {
+      if (!(error instanceof DOMException && error.name === "AbortError")) throw error;
+    });
+  } else {
+    download(href);
+  }
+}
+
+function canSharePdf(): boolean {
+  return typeof navigator !== "undefined" && typeof navigator.canShare === "function" && window.matchMedia("(pointer: coarse)").matches;
+}
+
 /** Exports are attachments: a temporary link downloads them without leaving the page. */
 function download(href: string) {
   const a = document.createElement("a");
@@ -118,6 +137,11 @@ export function ProfileHeader() {
             }
           >
             <MenuLabel>{t("exportNotesNote")}</MenuLabel>
+            {canSharePdf() ? (
+              <MenuItem onSelect={() => void sharePdf(`${exportBase}&format=pdf`, profile.displayName).catch(() => setError(tCommon("error")))}>
+                {t("sharePdf")}
+              </MenuItem>
+            ) : null}
             <MenuItem onSelect={() => download(`${exportBase}&format=pdf`)}>{t("exportPdf")}</MenuItem>
             <MenuItem onSelect={() => download(`${exportBase}&format=json`)}>{t("exportJson")}</MenuItem>
             <MenuSeparator />

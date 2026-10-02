@@ -7,6 +7,7 @@ import { PageContainer, PageHeader } from "@/components/app-shell/app-shell";
 import { LimitsForm } from "@/components/settings/limits-form";
 import { PreferencesForm } from "@/components/settings/preferences-form";
 import { Badge } from "@/components/ui/badge";
+import { InstallAppCard } from "@/components/pwa/install-app";
 import { Card, SectionHeading } from "@/components/ui/card";
 import { Callout } from "@/components/ui/feedback";
 import { requireViewer } from "@/lib/auth/session";
@@ -36,6 +37,7 @@ function StatusRow({ label, ok, okLabel, missingLabel, detail }: { label: string
 
 export default async function SettingsPage() {
   const viewer = await requireViewer();
+  const tInstall = await getTranslations("Install");
   const t = await getTranslations("Settings");
   const format = await getFormatter();
   const env = getEnv();
@@ -68,6 +70,13 @@ export default async function SettingsPage() {
           <SectionHeading id="prefs" title={t("preferences")} />
           <Card className="p-5">
             <PreferencesForm locale={viewer.locale} timezone={viewer.timezone} theme={viewer.theme} timezones={timezones} />
+          </Card>
+        </section>
+
+        <section aria-labelledby="app-heading" id="app">
+          <SectionHeading id="app-heading" title={tInstall("title")} />
+          <Card>
+            <InstallAppCard />
           </Card>
         </section>
 

@@ -28,7 +28,10 @@ phone) · **Live-tested** (against real providers) · **Deployed** ·
 | Security: SSRF guards, hostile-text handling, rate limits, no-index headers, secrets server-side | Implemented · unit/integration-tested; client bundles scanned for secrets |
 | Accessibility | axe (WCAG 2.1 AA rules): no serious/critical issues on main screens; keyboard flow tested |
 | Live research (Tavily + Anthropic) | Implemented · unit-tested with mocked SDK clients · **Blocked: not live-tested** (no `TAVILY_API_KEY` / `ANTHROPIC_API_KEY` in the build environment) |
+| Installable phone app: manifest, icons, iOS launch screens, service worker with offline screen, install guidance | Implemented · browser-tested (phone viewport, offline mode) |
+| Phone polish: bottom sheet with swipe-to-close, back button, frosted tab bar, loading skeletons, 16 px inputs, share PDF | Implemented · browser-tested |
 | Docker image and Compose stack | Implemented · compose file validated · **not built here** (no Docker daemon in the build environment) |
+| Render Blueprint (website, worker, database) | Implemented · migrations tested concurrently · **not deployed yet** (needs the owner's Render account) |
 | Hosted preview | **Blocked: not deployed** (no hosting access authorised for this project) |
 
 ## Test inventory
@@ -43,9 +46,11 @@ phone) · **Live-tested** (against real providers) · **Deployed** ·
   stale jobs, cancellation, duplicate submissions, provider failures,
   ownership, live/demo separation, hostile content, unsafe URLs, deletion,
   JSON and PDF exports in three languages.
-- End-to-end (Playwright): 16 tests — access control, full demo flow, identity
+- End-to-end (Playwright): 18 tests — access control, full demo flow, identity
   choice, partial + retry, guest isolation, accessibility, keyboard use, phone
-  layout, screenshot capture (desktop, phone, 320 px, dark mode, AZ, RU).
+  layout (bottom sheet swipe, back button, no sideways scrolling), installable
+  app (manifest, icons, offline screen, nothing private cached), screenshot
+  capture (desktop, phone, 320 px, dark mode, AZ, RU).
 
 ## Resuming work
 

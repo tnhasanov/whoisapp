@@ -36,9 +36,14 @@ const EnvSchema = z.object({
 
   DATABASE_URL: z.string().min(1),
   BETTER_AUTH_SECRET: z.string().min(32, "must be at least 32 characters"),
-  APP_URL: z.preprocess(emptyToUndefined, z.string().url().default("http://localhost:3000")),
+  /** Public URL. On Render it defaults to the service's own URL (RENDER_EXTERNAL_URL). */
+  APP_URL: z.preprocess(
+    (value) => emptyToUndefined(value) ?? emptyToUndefined(process.env.RENDER_EXTERNAL_URL),
+    z.string().url().default("http://localhost:3000"),
+  ),
   /** Enables the web owner-setup page while no owner exists. */
-  OWNER_SETUP_TOKEN: optionalString(z.string().min(16, "must be at least 16 characters")),
+  // Length is checked where it is used (see setupTokenStatus) so a short value never stops the app.
+  OWNER_SETUP_TOKEN: optionalString(),
   /** Allows anonymous visitors to open a fictional demo workspace. */
   PUBLIC_DEMO_ENABLED: booleanFlag(false),
   /** Comma-separated extra origins trusted by the auth layer. */
@@ -113,6 +118,15 @@ export function getEnv(): Env {
 /** For tests only. */
 export function resetEnvCache() {
   cached = undefined;
+}
+
+/** The setup token must be long enough to resist guessing; a short one disables /setup. */
+export const MIN_SETUP_TOKEN_LENGTH = 16;
+
+export function setupTokenStatus(env: Env = getEnv()): "missing" | "too_short" | "ok" {
+  const token = env.OWNER_SETUP_TOKEN?.trim();
+  if (!token) return "missing";
+  return token.length < MIN_SETUP_TOKEN_LENGTH ? "too_short" : "ok";
 }
 
 export type ProviderStatus = {

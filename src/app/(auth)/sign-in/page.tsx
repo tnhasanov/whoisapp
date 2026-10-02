@@ -6,7 +6,7 @@ import { DemoEntry, SignInForm } from "@/components/auth/sign-in-form";
 import { Card } from "@/components/ui/card";
 import { ownerExists } from "@/lib/auth/owner";
 import { getViewer } from "@/lib/auth/session";
-import { getEnv } from "@/lib/env";
+import { getEnv, setupTokenStatus } from "@/lib/env";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("Meta"))("signIn") };
@@ -29,7 +29,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
           <SignInForm next={next ?? null} />
         </div>
         <p className="mt-5 text-xs leading-relaxed text-subtle">{t("closedRegistration")}</p>
-        {!hasOwner && env.OWNER_SETUP_TOKEN ? (
+        {!hasOwner && setupTokenStatus(env) !== "missing" ? (
           <p className="mt-3 text-sm">
             <Link href="/setup" className="font-medium text-accent hover:underline">
               {t("setupLink")}

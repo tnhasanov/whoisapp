@@ -49,3 +49,6 @@ next-env.d.ts
 /blob-report/
 /.cache/
 tests/e2e/.auth/
+
+# bundled worker
+/dist/

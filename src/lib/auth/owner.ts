@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "@/lib/db/client";
 import { ownerSettings, users } from "@/lib/db/schema";
-import { getEnv } from "@/lib/env";
+import { getEnv, setupTokenStatus } from "@/lib/env";
 import { getAuth } from "./auth";
 
 /**
@@ -63,8 +63,10 @@ export async function createOwner(input: { name: string; email: string; password
 
 /** Constant-time comparison of the setup token; setup is disabled when no token is configured. */
 export function verifySetupToken(candidate: string | null | undefined): boolean {
-  const expected = getEnv().OWNER_SETUP_TOKEN;
-  if (!expected || !candidate) return false;
+  const env = getEnv();
+  if (setupTokenStatus(env) !== "ok" || !candidate) return false;
+  const expected = env.OWNER_SETUP_TOKEN!.trim();
+  candidate = candidate.trim();
   const a = Buffer.from(candidate);
   const b = Buffer.from(expected);
   return a.length === b.length && timingSafeEqual(a, b);

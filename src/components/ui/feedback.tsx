@@ -1,6 +1,6 @@
 import { AlertTriangle, CircleCheck, Info, OctagonAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const calloutTones = {
@@ -48,8 +48,8 @@ export function EmptyState({ icon, title, children, action, className }: { icon?
   );
 }
 
-export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("animate-soft-pulse rounded-md bg-sunken", className)} aria-hidden />;
+export function Skeleton({ className, style }: { className?: string; style?: CSSProperties }) {
+  return <div className={cn("animate-soft-pulse rounded-md bg-sunken", className)} style={style} aria-hidden />;
 }
 
 export function Spinner({ className, label }: { className?: string; label?: string }) {

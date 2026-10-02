@@ -19,6 +19,8 @@ const contentSecurityPolicy = [
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
+  "worker-src 'self'",
+  "manifest-src 'self'",
 ].join("; ");
 
 const nextConfig: NextConfig = {
@@ -35,6 +37,14 @@ const nextConfig: NextConfig = {
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
           { key: "Content-Security-Policy", value: contentSecurityPolicy },
+        ],
+      },
+      {
+        // The service worker must always be revalidated so app updates reach installed copies.
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+          { key: "Service-Worker-Allowed", value: "/" },
         ],
       },
     ];
