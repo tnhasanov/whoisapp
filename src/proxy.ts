@@ -9,6 +9,8 @@ import { NextResponse, type NextRequest } from "next/server";
 const PUBLIC_PREFIXES = [
   "/sign-in",
   "/setup",
+  // Privacy policy for the app stores and visitors (no account data).
+  "/privacy",
   "/api/health",
   // Sign-in for the mobile app (only selected endpoints are reachable; see HTTP_AUTH_PATHS).
   "/api/auth",

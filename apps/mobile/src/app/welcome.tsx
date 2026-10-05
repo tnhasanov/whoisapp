@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { FileSearch, FlaskConical, Link2, ShieldCheck } from "lucide-react-native";
 import { useRef, useState } from "react";
-import { StyleSheet, View, type TextInput } from "react-native";
+import { Pressable, StyleSheet, View, type TextInput } from "react-native";
 import { useTranslations } from "use-intl";
 import { MetaResponseSchema } from "@personbrief/shared/api/v1";
 import type { Locale } from "@personbrief/shared/domain";
@@ -14,17 +14,21 @@ import { Segmented } from "@/components/ui/list";
 import { Screen } from "@/components/ui/screen";
 import { OfflineBanner } from "@/components/ui/states";
 import { Text } from "@/components/ui/text";
-import { haptics } from "@/lib/actions";
+import { haptics, openExternal } from "@/lib/actions";
 import { request } from "@/lib/api";
 import { API_CONFIG, APP_BUILD, APP_VERSION, VARIANT } from "@/lib/config";
 import { LOCALE_NAMES, useLocaleState } from "@/lib/i18n";
 import { useSession, type SignInResult } from "@/lib/session";
 import { SPACE, useColors } from "@/lib/theme";
 
+/** The server's public privacy page (also listed in the app stores). */
+const privacyUrl = API_CONFIG.ok ? `${API_CONFIG.baseUrl}/privacy` : null;
+
 /** Welcome and sign-in. Accounts are created by the owner only — there is no registration here. */
 export default function Welcome() {
   const t = useTranslations("App.welcome");
   const tAuth = useTranslations("Auth");
+  const tPrivacy = useTranslations("Privacy");
   const colors = useColors();
   const { state, signIn, signInDemo } = useSession();
   const { locale, setDeviceLocale } = useLocaleState();
@@ -164,6 +168,13 @@ export default function Welcome() {
         </Card>
       ) : null}
 
+      {privacyUrl ? (
+        <Pressable accessibilityRole="link" onPress={() => void openExternal(privacyUrl)} hitSlop={8} style={styles.privacy}>
+          <Text variant="footnote" tone="accent" align="center">
+            {tPrivacy("link")}
+          </Text>
+        </Pressable>
+      ) : null}
       <Text variant="caption" tone="subtle" align="center">
         {t("version", { version: APP_VERSION, build: APP_BUILD })}
         {VARIANT !== "production" ? ` · ${VARIANT} · ${host}` : ""}
@@ -179,4 +190,5 @@ const styles = StyleSheet.create({
   point: { flexDirection: "row", alignItems: "center", gap: SPACE.sm },
   flex: { flex: 1 },
   card: { gap: SPACE.lg },
+  privacy: { alignSelf: "center" },
 });

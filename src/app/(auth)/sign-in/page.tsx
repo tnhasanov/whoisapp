@@ -18,6 +18,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
   // A demo visitor may still sign in as the owner; anyone else already signed in goes to the app.
   if (viewer && viewer.role === "owner") redirect(next?.startsWith("/") && !next.startsWith("//") ? next : "/search");
   const t = await getTranslations("Auth");
+  const tPrivacy = await getTranslations("Privacy");
   const env = getEnv();
   const hasOwner = await ownerExists();
   return (
@@ -51,6 +52,11 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
           </div>
         </Card>
       ) : null}
+      <p className="text-center text-xs">
+        <Link href="/privacy" className="text-muted hover:text-ink hover:underline">
+          {tPrivacy("link")}
+        </Link>
+      </p>
     </div>
   );
 }

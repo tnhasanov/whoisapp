@@ -15,6 +15,10 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
  *   EAS_PROJECT_ID       Expo project id from `eas init` (enables EAS builds
  *                        and push notifications). Not invented here.
  *   EXPO_OWNER           Expo account or organisation that owns the project.
+ *   GOOGLE_SERVICES_JSON Path to the Firebase google-services.json (an EAS
+ *                        "file" environment variable). Android push
+ *                        notifications need it; without it the app reports
+ *                        notifications as unavailable.
  *
  * The scheme names must match packages/shared/src/app.ts (checked by a test).
  */
@@ -69,6 +73,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
         backgroundColor: INK,
       },
       predictiveBackGestureEnabled: true,
+      ...(process.env.GOOGLE_SERVICES_JSON ? { googleServicesFile: process.env.GOOGLE_SERVICES_JSON } : {}),
       // The app needs network access only; these are added by libraries but never used.
       blockedPermissions: [
         "android.permission.RECORD_AUDIO",

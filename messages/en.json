@@ -777,6 +777,21 @@
     "limitsTitle": "Limitations",
     "limitsBody": "Web coverage is never exhaustive, sources can be wrong or outdated, and an official source is not independent verification. Always confirm important details directly. PersonBrief makes no claim of regulatory certification."
   },
+  "Privacy": {
+    "title": "Privacy",
+    "subtitle": "How this PersonBrief installation handles information. This page is public; nothing on it depends on who is reading it.",
+    "accountTitle": "Accounts and sign-in",
+    "accountBody": "Registration is closed: accounts are created by the owner of this installation. For each account the name, email address and a hashed password are stored, together with active sessions (device type, network address and sign-in time) so they can be reviewed and signed out. Sign-in attempts are rate-limited by network address. There is no advertising, tracking or analytics, and nothing is sold or shared for marketing.",
+    "appTitle": "The phone app",
+    "appBody": "The iPhone and Android app signs in to this same server. On the phone it keeps only the session and a few settings (language, theme, app lock, notifications) in secure storage; research is loaded from the server and held in memory, not saved on the phone. PDF and JSON exports are temporary files for the share sheet and are deleted afterwards. If notifications are turned on, the phone's push token is stored with that session so the server can send a short notice when research finishes or needs a choice — never the name of the person researched — through Expo's push service and Apple or Google. Signing out removes the session, the push token and the app's local data.",
+    "subjectsTitle": "If you were researched",
+    "subjectsBody": "Briefs are assembled from public professional sources for the account owner's own meeting preparation and are not published. Someone who believes this installation holds information about them can ask the operator to correct or delete it.",
+    "contactTitle": "Contact",
+    "contactBody": "Questions or requests about this installation: {email}",
+    "contactNone": "This installation is run privately by its owner. Please contact the person who gave you access.",
+    "back": "Back to sign-in",
+    "link": "Privacy"
+  },
   "Report": {
     "title": "Report an issue",
     "subtitle": "Flag something incorrect, outdated or about the wrong person. The report is stored with this profile.",

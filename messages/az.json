@@ -777,6 +777,21 @@
     "limitsTitle": "Məhdudiyyətlər",
     "limitsBody": "İnternetin əhatəsi heç vaxt tam olmur, mənbələr səhv və ya köhnəlmiş ola bilər, rəsmi mənbə isə müstəqil yoxlama deyil. Vacib təfərrüatları həmişə birbaşa təsdiqləyin. PersonBrief heç bir tənzimləyici sertifikata malik olduğunu iddia etmir."
   },
+  "Privacy": {
+    "title": "Məxfilik",
+    "subtitle": "Bu PersonBrief quraşdırmasının məlumatlarla necə davrandığı. Bu səhifə açıqdır; onun məzmunu oxuyan şəxsdən asılı deyil.",
+    "accountTitle": "Hesablar və giriş",
+    "accountBody": "Qeydiyyat bağlıdır: hesabları bu quraşdırmanın sahibi yaradır. Hər hesab üçün ad, e-poçt ünvanı və şifrənin heşi, həmçinin aktiv sessiyalar (cihaz növü, şəbəkə ünvanı və giriş vaxtı) saxlanılır ki, onları nəzərdən keçirmək və sessiyadan çıxarmaq mümkün olsun. Giriş cəhdləri şəbəkə ünvanına görə məhdudlaşdırılır. Reklam, izləmə və analitika yoxdur; heç nə satılmır və marketinq üçün paylaşılmır.",
+    "appTitle": "Mobil tətbiq",
+    "appBody": "iPhone və Android tətbiqi eyni serverə daxil olur. Telefonda yalnız sessiya və bir neçə ayar (dil, mövzu, tətbiq kilidi, bildirişlər) təhlükəsiz yaddaşda saxlanılır; araşdırmalar serverdən yüklənir və telefonda saxlanılmır, yalnız yaddaşda tutulur. PDF və JSON ixracları paylaşım menyusu üçün müvəqqəti fayllardır və sonra silinir. Bildirişlər aktivdirsə, telefonun push tokeni həmin sessiya ilə saxlanılır ki, server araşdırma bitdikdə və ya seçim tələb etdikdə qısa bildiriş göndərə bilsin — araşdırılan şəxsin adı heç vaxt göstərilmir; bildirişlər Expo push xidməti və Apple və ya Google vasitəsilə çatdırılır. Hesabdan çıxış sessiyanı, push tokenini və tətbiqin yerli məlumatlarını silir.",
+    "subjectsTitle": "Əgər sizin haqqınızda araşdırma aparılıbsa",
+    "subjectsBody": "Arayışlar hesab sahibinin öz görüşlərinə hazırlıq üçün açıq peşəkar mənbələrdən toplanır və dərc edilmir. Bu quraşdırmada özü haqqında məlumat saxlandığını düşünən şəxs operatordan onun düzəldilməsini və ya silinməsini xahiş edə bilər.",
+    "contactTitle": "Əlaqə",
+    "contactBody": "Bu quraşdırma ilə bağlı suallar və ya müraciətlər: {email}",
+    "contactNone": "Bu quraşdırmanı sahibi şəxsi qaydada idarə edir. Sizə giriş verən şəxslə əlaqə saxlayın.",
+    "back": "Girişə qayıdın",
+    "link": "Məxfilik"
+  },
   "Report": {
     "title": "Problem barədə bildirin",
     "subtitle": "Yanlış, köhnəlmiş və ya başqa şəxsə aid məlumatı qeyd edin. Bildiriş bu profil ilə birlikdə saxlanılır.",

@@ -92,6 +92,8 @@ const EnvSchema = z.object({
   PUSH_NOTIFICATIONS_ENABLED: booleanFlag(true),
   /** Expo access token; only needed when "enhanced push security" is enabled for the Expo project. */
   EXPO_ACCESS_TOKEN: optionalString(),
+  /** Contact shown on the public privacy page (/privacy); nothing is shown when unset. */
+  SUPPORT_EMAIL: optionalString(z.string().email()),
 
   /** Simulated provider latency in the fictional demo (milliseconds per call). */
   FIXTURE_LATENCY_MS: intInRange(0, 10000, 350),

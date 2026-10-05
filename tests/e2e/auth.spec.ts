@@ -30,6 +30,19 @@ test.describe("access control", () => {
     await expect(page).toHaveURL(/\/sign-in/);
   });
 
+  test("the privacy page is public and shows no account data", async ({ page }) => {
+    await page.goto("/sign-in");
+    await page.getByRole("link", { name: "Privacy" }).click();
+    await expect(page).toHaveURL(/\/privacy$/);
+    await expect(page.getByRole("heading", { level: 1, name: "Privacy" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "The phone app" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "If you were researched" })).toBeVisible();
+    // No contact address is configured in the test server, so none is invented.
+    await expect(page.getByText("contact the person who gave you access")).toBeVisible();
+    await expect(page.locator("a[href^='mailto:']")).toHaveCount(0);
+    await expect(page.getByText(OWNER.email)).toHaveCount(0);
+  });
+
   test("public setup is closed once an owner exists", async ({ page }) => {
     await page.goto("/setup");
     await expect(page.getByText(/owner account already exists|Setup is not available/i).first()).toBeVisible();

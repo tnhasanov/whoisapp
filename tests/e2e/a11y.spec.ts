@@ -12,9 +12,11 @@ async function expectNoSeriousViolations(page: Page, label: string) {
   expect(serious).toEqual([]);
 }
 
-test("sign-in page has no serious accessibility violations", async ({ page }) => {
+test("sign-in and privacy pages have no serious accessibility violations", async ({ page }) => {
   await page.goto("/sign-in");
   await expectNoSeriousViolations(page, "sign-in");
+  await page.goto("/privacy");
+  await expectNoSeriousViolations(page, "privacy");
 });
 
 test.describe("signed in", () => {
