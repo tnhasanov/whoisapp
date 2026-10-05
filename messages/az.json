@@ -734,6 +734,8 @@
     "disabled": "Deaktivdir",
     "liveReady": "Canlı araşdırma hazırdır.",
     "liveNotReady": "Hər iki provayder konfiqurasiya olunmayınca canlı araşdırma işləyə bilməz.",
+    "workerMissingKeysTitle": "Araşdırma üzrə işçi prosesdə provayder açarları yoxdur",
+    "workerMissingKeys": "Vebsaytda TAVILY_API_KEY və ANTHROPIC_API_KEY təyin edilib, lakin onlayn olan işçi prosesdə yoxdur. Açarları götürməsi üçün işçi prosesi yenidən başladın və ya yenidən yerləşdirin — Render-də personbrief-worker xidmətini açıb Manual Deploy seçin.",
     "setupSteps": "Canlı araşdırmanı aktivləşdirmək üçün server mühitində TAVILY_API_KEY və ANTHROPIC_API_KEY dəyişənlərini təyin edin, sonra veb tətbiqini və işçi prosesi yenidən başladın.",
     "worker": "Araşdırma üzrə işçi proses",
     "workerOnline": "Onlayn",

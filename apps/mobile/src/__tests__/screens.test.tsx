@@ -189,6 +189,14 @@ describe("Saved work and settings", () => {
     expect(screen.queryByText(/tvly-|sk-ant-/)).toBeNull();
   });
 
+  it("says when the research worker has not picked up the provider keys", async () => {
+    const providers = { ...settings.owner.providers, search: { ...settings.owner.providers.search, configured: true }, model: { ...settings.owner.providers.model, configured: true }, liveReady: false, workerKeys: false };
+    fakeServer([...base.filter((r) => r.path !== "/settings"), { path: "/settings", body: { ...settings, owner: { ...settings.owner, providers } } }]);
+    renderScreens({ "(tabs)/settings": SettingsScreen }, "/settings");
+    expect(await screen.findByText("The research worker does not have the provider keys")).toBeTruthy();
+    expect(screen.getByText(/redeploy the worker/)).toBeTruthy();
+  });
+
   it("switches the interface to Azerbaijani and Russian, including long labels", async () => {
     fakeServer([...base.filter((r) => r.path !== "/me"), { path: "/me", body: { ...me, preferences: { locale: "az", timezone: "Asia/Baku" } } }]);
     const az = renderScreens({ "(tabs)/index": SearchScreen }, "/");

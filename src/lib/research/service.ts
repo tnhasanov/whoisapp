@@ -11,7 +11,7 @@ import {
   type ResearchQuery,
 } from "@/lib/db/schema";
 import type { UserRole, Workspace } from "@/lib/domain/types";
-import { getProviderStatus, type Env } from "@/lib/env";
+import type { Env } from "@/lib/env";
 import {
   appendEvent,
   chooseCandidate,
@@ -24,6 +24,7 @@ import {
 import { consumeRateLimit } from "@/lib/rate-limit";
 import { buildJobConfig } from "@/lib/research/config";
 import { cacheKey } from "@/lib/research/cache";
+import { getLiveReadiness } from "@/lib/research/readiness";
 import { normaliseForMatch } from "@/lib/research/text";
 import { canonicaliseUrl } from "@/lib/urls/canonical";
 import { validateProfileUrl } from "@/lib/urls/safe-url";
@@ -93,8 +94,12 @@ async function ownerLimits(db: Database, userId: string) {
 async function enforceWorkspaceRules(db: Database, env: Env, actor: Actor) {
   if (actor.workspace === "live") {
     if (actor.role !== "owner") throw new ResearchCommandError("live_not_allowed", "Live research is only available to the owner account.");
-    if (!getProviderStatus(env).liveReady) {
+    const readiness = await getLiveReadiness(db, env);
+    if (!readiness.configured) {
       throw new ResearchCommandError("live_not_configured", "Live research is not configured yet. Add the provider keys, or switch to the demo workspace.");
+    }
+    if (!readiness.ready) {
+      throw new ResearchCommandError("live_not_configured", "The research worker does not have the provider keys yet. Restart or redeploy the worker, then try again.");
     }
   }
   const limit = actor.workspace === "live" ? env.RESEARCH_MAX_JOBS_PER_HOUR : 120;

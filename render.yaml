@@ -8,8 +8,12 @@
 # Everything else (database, session secret, public URL) is set automatically.
 #
 # Plans: two "starter" services (always on, 512 MB each) and a "basic-256mb"
-# database. The website and worker run separately because together they need
-# more memory than one 512 MB instance during PDF exports.
+# database with 1 GB of storage. The website and worker run separately because
+# together they need more memory than one 512 MB instance during PDF exports.
+#
+# Only the website and worker are built here. The phone app (apps/mobile) is
+# built with EAS (docs/mobile-setup.md); commits that change only apps/mobile
+# or docs do not redeploy these services.
 
 databases:
   - name: personbrief-db
@@ -18,6 +22,10 @@ databases:
     plan: basic-256mb
     region: frankfurt
     postgresMajorVersion: "16"
+    # Storage is set explicitly (1 GB, or a multiple of 5 GB) so its cost is
+    # predictable. It can be increased later from the dashboard or here, never
+    # decreased: if your database already has more, set that size before syncing.
+    diskSizeGB: 1
     # No external connections: only services in this workspace can reach it.
     ipAllowList: []
 
@@ -27,17 +35,23 @@ services:
     runtime: node
     plan: starter
     region: frankfurt
+    buildFilter:
+      ignoredPaths:
+        - apps/mobile/**
+        - docs/**
     buildCommand: npm ci --include=dev && npm run build
     # Applies new database migrations before each release goes live.
     preDeployCommand: npm run db:migrate
-    startCommand: npm run start
+    # The memory cap applies only to the running site (keeps it within the
+    # 512 MB instance); the build runs without it.
+    startCommand: NODE_OPTIONS=--max-old-space-size=320 npm run start
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: "22"
-      # Keeps memory within the 512 MB instance.
-      - key: NODE_OPTIONS
-        value: --max-old-space-size=320
+      # Production mode: development-only sign-in origins stay disabled.
+      - key: NODE_ENV
+        value: production
       - key: DATABASE_URL
         fromDatabase:
           name: personbrief-db
@@ -58,16 +72,18 @@ services:
     runtime: node
     plan: starter
     region: frankfurt
+    buildFilter:
+      ignoredPaths:
+        - apps/mobile/**
+        - docs/**
     buildCommand: npm ci --include=dev && npm run build:worker
     preDeployCommand: npm run db:migrate
-    startCommand: npm run worker
+    startCommand: NODE_OPTIONS=--max-old-space-size=256 npm run worker
     envVars:
       - key: NODE_VERSION
         value: "22"
       - key: NODE_ENV
         value: production
-      - key: NODE_OPTIONS
-        value: --max-old-space-size=256
       - key: DATABASE_URL
         fromDatabase:
           name: personbrief-db
@@ -75,7 +91,15 @@ services:
       # The worker never checks sign-ins; it only needs a valid value.
       - key: BETTER_AUTH_SECRET
         generateValue: true
-      # Research keys are copied from the website service (redeploy the worker after changing them).
+      # Research runs here, with the keys copied from the website service. The
+      # copy is taken when the worker deploys: after adding or changing the keys
+      # on "personbrief", redeploy "personbrief-worker" (Manual Deploy). Until
+      # then Settings says the worker is missing the keys and live research
+      # is not accepted.
+      # Notifications to the phone app need nothing here. Set EXPO_ACCESS_TOKEN
+      # only if you turn on enhanced push security in your Expo account. To
+      # switch notifications off, set PUSH_NOTIFICATIONS_ENABLED=false on both
+      # services (the website then tells the app they are unavailable).
       - key: TAVILY_API_KEY
         fromService:
           type: web

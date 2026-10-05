@@ -14,8 +14,8 @@ import { FIXTURE_EXAMPLES } from "@/fixtures/world";
 import { requireViewer } from "@/lib/auth/session";
 import { recentSearches } from "@/lib/data/jobs";
 import { getDb } from "@/lib/db/client";
-import { getProviderStatus } from "@/lib/env";
 import { getEnv } from "@/lib/env";
+import { getLiveReadiness } from "@/lib/research/readiness";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("Meta"))("research") };
@@ -27,10 +27,14 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const viewer = await requireViewer();
   const sp = await searchParams;
   const t = await getTranslations("Search");
+  const tSettings = await getTranslations("Settings");
   const format = await getFormatter();
-  const status = getProviderStatus();
-  const recent = await recentSearches(getDb(), viewer.userId, viewer.workspace);
-  const liveBlocked = viewer.workspace === "live" && !status.liveReady;
+  const db = getDb();
+  const [recent, readiness] = await Promise.all([
+    recentSearches(db, viewer.userId, viewer.workspace),
+    viewer.workspace === "live" ? getLiveReadiness(db, getEnv()) : null,
+  ]);
+  const liveBlocked = readiness !== null && !readiness.ready;
   const clip = (v: string | undefined, n: number) => (typeof v === "string" ? v.slice(0, n) : undefined);
 
   return (
@@ -41,7 +45,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           {liveBlocked ? (
             <Callout
               tone="warn"
-              title={t("liveNotConfiguredTitle")}
+              title={readiness?.configured ? tSettings("workerMissingKeysTitle") : t("liveNotConfiguredTitle")}
               action={
                 <div className="flex flex-wrap gap-2">
                   <SwitchToDemoButton />
@@ -51,7 +55,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                 </div>
               }
             >
-              {t("liveNotConfiguredBody")}
+              {readiness?.configured ? tSettings("workerMissingKeys") : t("liveNotConfiguredBody")}
             </Callout>
           ) : null}
           {viewer.isGuest ? <Callout>{t("guestNote", { hours: getEnv().DEMO_GUEST_TTL_HOURS })}</Callout> : null}

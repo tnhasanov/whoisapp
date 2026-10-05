@@ -13,5 +13,5 @@ export const PATCH = authed(async (ctx) => {
   if (body.locale) update.locale = body.locale;
   if (body.timezone) update.timezone = body.timezone;
   await ctx.db.update(ownerSettings).set(update).where(eq(ownerSettings.userId, ctx.viewer.userId));
-  return json(meResponse({ ...ctx, viewer: { ...ctx.viewer, ...update } }));
+  return json(await meResponse({ ...ctx, viewer: { ...ctx.viewer, ...update } }));
 });

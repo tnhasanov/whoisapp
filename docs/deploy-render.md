@@ -21,7 +21,8 @@ everything at any time from the Render dashboard.
      characters (for example four random words). You will type it once in
      step 2. Keep it to yourself.
    - **TAVILY_API_KEY** and **ANTHROPIC_API_KEY** — leave them empty for now
-     if you do not have them yet. The demo works without them.
+     if you do not have them yet. The demo works without them. (The worker
+     copies them from the website; see step 5.)
 7. Click **Deploy Blueprint** (add a card if Render asks). The first build
    takes about 5–10 minutes.
 
@@ -49,6 +50,9 @@ Everything in the demo is invented, so you can click around freely.
 
 PersonBrief then opens full-screen from your home screen, like any other app.
 
+There is also a native iPhone and Android app in `apps/mobile`. It uses this
+same website as its server; see [mobile-setup.md](mobile-setup.md).
+
 ## 5. Turn on real research (when you are ready)
 
 1. Get an API key from [Tavily](https://app.tavily.com) (web search) and one
@@ -57,14 +61,21 @@ PersonBrief then opens full-screen from your home screen, like any other app.
 2. In Render open **personbrief → Environment**, fill in `TAVILY_API_KEY` and
    `ANTHROPIC_API_KEY`, and save. The website restarts by itself.
 3. Open **personbrief-worker** and click **Manual Deploy → Deploy latest
-   commit**, so the worker picks up the keys too.
+   commit**, so the worker picks up the keys too. Until it has them,
+   **Settings** says "The research worker does not have the provider keys" and
+   live research is not started.
 4. In PersonBrief, switch to **Live** and check **Settings**: both providers
-   should show **Configured**. Run one small search to confirm.
+   should show **Configured** and live research **ready**. Run one small
+   search to confirm.
 
 ## Good to know
 
 - **Updates:** every new commit on the chosen branch is deployed
-  automatically.
+  automatically, except commits that only change the phone app
+  (`apps/mobile`) or the documentation.
+- **Database storage:** the Blueprint asks for 1 GB, plenty for one person's
+  research (retrieved page text is deleted after 14 days). You can increase it
+  under **personbrief-db → Settings**; it cannot be reduced.
 - **Own domain:** add it in Render under **personbrief → Settings → Custom
   Domains**, then set `APP_URL` to `https://your-domain` in the website's
   environment.

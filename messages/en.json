@@ -734,6 +734,8 @@
     "disabled": "Disabled",
     "liveReady": "Live research is ready.",
     "liveNotReady": "Live research cannot run until both providers are configured.",
+    "workerMissingKeysTitle": "The research worker does not have the provider keys",
+    "workerMissingKeys": "The website has TAVILY_API_KEY and ANTHROPIC_API_KEY, but the research worker that is online does not. Restart or redeploy the worker so it picks them up — on Render, open personbrief-worker and choose Manual Deploy.",
     "setupSteps": "To enable live research, set TAVILY_API_KEY and ANTHROPIC_API_KEY in the server environment and restart the web app and the worker.",
     "worker": "Research worker",
     "workerOnline": "Online",

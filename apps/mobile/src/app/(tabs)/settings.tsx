@@ -218,7 +218,13 @@ export default function SettingsScreen() {
             <Row title={t("anthropic")} subtitle={`${t("model")}: ${owner.providers.model.model} · ${t("effort")}: ${owner.providers.model.effort}`} right={<Status ok={owner.providers.model.configured} okLabel={t("configured")} missingLabel={t("missing")} />} />
             <Row title={t("worker")} right={<Status ok={settings.data?.worker.online ?? false} okLabel={t("workerOnline")} missingLabel={t("missing")} />} />
           </ListGroup>
-          {owner.providers.liveReady ? <Banner tone="ok" body={t("liveReady")} /> : <Banner tone="warn" title={t("liveNotReady")} body={tApp("setupOnServer")} />}
+          {owner.providers.liveReady ? (
+            <Banner tone="ok" body={t("liveReady")} />
+          ) : owner.providers.search.configured && owner.providers.model.configured && owner.providers.workerKeys === false ? (
+            <Banner tone="warn" title={t("workerMissingKeysTitle")} body={t("workerMissingKeys")} />
+          ) : (
+            <Banner tone="warn" title={t("liveNotReady")} body={tApp("setupOnServer")} />
+          )}
 
           <SectionHeader title={t("limits")} hint={tApp("limitsHint")} />
           <ListGroup>

@@ -317,7 +317,7 @@ describe("/api/v1 — research, saved work and exports", () => {
     expect(live.status).toBe(503);
     expect(ApiErrorBodySchema.parse(await body(live)).error.code).toBe("live_not_configured");
     const ownerSettings = SettingsResponseSchema.parse(await body(await call(settings.GET, "/settings", { cookie })));
-    expect(ownerSettings.owner?.providers).toMatchObject({ liveReady: false, search: { configured: false }, model: { configured: false } });
+    expect(ownerSettings.owner?.providers).toMatchObject({ liveReady: false, workerKeys: null, search: { configured: false }, model: { configured: false } });
     expect(JSON.stringify(ownerSettings)).not.toMatch(/tvly-|sk-ant-/);
 
     const other = await otherAccount();

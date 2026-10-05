@@ -12,9 +12,10 @@ import { Card, SectionHeading } from "@/components/ui/card";
 import { Callout } from "@/components/ui/feedback";
 import { requireViewer } from "@/lib/auth/session";
 import { getDb } from "@/lib/db/client";
-import { ownerSettings, usageRecords, workerHeartbeats } from "@/lib/db/schema";
+import { ownerSettings, usageRecords } from "@/lib/db/schema";
 import { getEnv, getProviderStatus } from "@/lib/env";
 import { resolveLimits } from "@/lib/research/config";
+import { getLiveReadiness } from "@/lib/research/readiness";
 
 export async function generateMetadata() {
   return { title: (await getTranslations("Meta"))("settings") };
@@ -43,9 +44,9 @@ export default async function SettingsPage() {
   const env = getEnv();
   const status = getProviderStatus(env);
   const db = getDb();
-  const [[settings], workers, usage] = await Promise.all([
+  const [[settings], readiness, usage] = await Promise.all([
     db.select().from(ownerSettings).where(eq(ownerSettings.userId, viewer.userId)),
-    db.select({ id: workerHeartbeats.workerId }).from(workerHeartbeats).where(gt(workerHeartbeats.lastSeenAt, sql`now() - interval '60 seconds'`)),
+    getLiveReadiness(db, env),
     db
       .select({
         provider: usageRecords.provider,
@@ -97,12 +98,22 @@ export default async function SettingsPage() {
                     </span>
                   </li>
                   <StatusRow label={t("directFetch")} ok={status.directFetch} okLabel={t("enabled")} missingLabel={t("disabled")} />
-                  <StatusRow label={t("worker")} ok={workers.length > 0} okLabel={t("workerOnline")} missingLabel={t("missing")} detail={workers.length === 0 ? t("workerOffline") : undefined} />
+                  <StatusRow
+                    label={t("worker")}
+                    ok={readiness.workersOnline > 0}
+                    okLabel={t("workerOnline")}
+                    missingLabel={t("missing")}
+                    detail={readiness.workersOnline === 0 ? t("workerOffline") : undefined}
+                  />
                 </ul>
               </Card>
               <div className="mt-3">
-                {status.liveReady ? (
+                {readiness.ready ? (
                   <Callout tone="ok">{t("liveReady")}</Callout>
+                ) : readiness.configured ? (
+                  <Callout tone="warn" title={t("workerMissingKeysTitle")}>
+                    {t("workerMissingKeys")}
+                  </Callout>
                 ) : (
                   <Callout tone="warn" title={t("liveNotReady")}>
                     {t("setupSteps")}

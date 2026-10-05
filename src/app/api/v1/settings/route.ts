@@ -1,8 +1,9 @@
 import { and, eq, gt, sql } from "drizzle-orm";
 import { authed, json } from "@/lib/api/v1/http";
-import { ownerSettings, usageRecords, workerHeartbeats } from "@/lib/db/schema";
+import { ownerSettings, usageRecords } from "@/lib/db/schema";
 import { getProviderStatus } from "@/lib/env";
 import { resolveLimits } from "@/lib/research/config";
+import { getLiveReadiness } from "@/lib/research/readiness";
 import type { SettingsResponse } from "@personbrief/shared/api/v1";
 
 export const dynamic = "force-dynamic";
@@ -11,8 +12,8 @@ export const dynamic = "force-dynamic";
 export const GET = authed(async (ctx) => {
   const { db, env, viewer } = ctx;
   const since = new Date(Date.now() - 30 * 86_400_000);
-  const [workers, [settings], usage] = await Promise.all([
-    db.select({ id: workerHeartbeats.workerId }).from(workerHeartbeats).where(gt(workerHeartbeats.lastSeenAt, sql`now() - interval '60 seconds'`)).limit(1),
+  const [readiness, [settings], usage] = await Promise.all([
+    getLiveReadiness(db, env),
     db.select().from(ownerSettings).where(eq(ownerSettings.userId, viewer.userId)),
     viewer.role === "owner"
       ? db
@@ -31,7 +32,7 @@ export const GET = authed(async (ctx) => {
   const status = getProviderStatus(env);
   const limits = resolveLimits(env, settings?.researchLimits);
   const body: SettingsResponse = {
-    worker: { online: workers.length > 0 },
+    worker: { online: readiness.workersOnline > 0 },
     retention: { sourceContentDays: env.SOURCE_CONTENT_RETENTION_DAYS, demoGuestHours: env.DEMO_GUEST_TTL_HOURS },
     owner:
       viewer.role === "owner"
@@ -39,7 +40,8 @@ export const GET = authed(async (ctx) => {
             providers: {
               search: { name: "Tavily", configured: status.tavily },
               model: { name: "Anthropic", configured: status.anthropic, model: status.model, effort: status.effort },
-              liveReady: status.liveReady,
+              liveReady: readiness.ready,
+              workerKeys: readiness.workerReady,
               directFetch: status.directFetch,
             },
             limits: {

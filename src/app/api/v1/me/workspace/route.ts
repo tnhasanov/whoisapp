@@ -11,5 +11,5 @@ export const PUT = authed(async (ctx) => {
   requireOwnerRole(ctx);
   const { workspace } = await readBody(ctx.request, SetWorkspaceRequestSchema);
   await ctx.db.update(ownerSettings).set({ activeWorkspace: workspace }).where(eq(ownerSettings.userId, ctx.viewer.userId));
-  return json(meResponse({ ...ctx, viewer: { ...ctx.viewer, workspace } }));
+  return json(await meResponse({ ...ctx, viewer: { ...ctx.viewer, workspace } }));
 });

@@ -2,10 +2,11 @@ import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { getJobView, listJobs } from "@/lib/data/jobs";
 import { addNote, addTag, deleteJob, deleteProfile, getProfileView, listProfiles, reportIssue, setSaved } from "@/lib/data/profiles";
-import { jobDocuments, notes, profiles, researchJobs } from "@/lib/db/schema";
+import { jobDocuments, notes, profiles, researchJobs, workerHeartbeats } from "@/lib/db/schema";
 import { buildJsonExport } from "@/lib/export/json";
 import { storeHits } from "@/lib/research/pipeline/documents";
 import { createProviders } from "@/lib/research/providers";
+import { getLiveReadiness } from "@/lib/research/readiness";
 import { buildJobConfig } from "@/lib/research/config";
 import {
   cancelResearch,
@@ -81,6 +82,33 @@ describe("authentication and ownership", () => {
     expect(live.reasoning.id).toBe("anthropic");
     // Without keys the live adapters refuse to start instead of degrading to demo data.
     expect(() => createProviders({ workspace: "live", config: buildJobConfig(env(), "live", null), env: env() })).toThrow(/not configured/i);
+  });
+
+  it("live research is refused while an online worker lacks the provider keys", async () => {
+    const owner = await createUser("owner", "live");
+    const keyed = { ...env(), TAVILY_API_KEY: "tvly-placeholder", ANTHROPIC_API_KEY: "sk-ant-placeholder" };
+    const checkIn = (workerId: string, liveReady: boolean | null) =>
+      db().insert(workerHeartbeats).values({ workerId, startedAt: new Date(), lastSeenAt: new Date(), liveReady });
+
+    // The website has the keys, but the online worker was not restarted after they were added.
+    await checkIn("stale-worker", false);
+    expect(await getLiveReadiness(db(), keyed)).toEqual({ configured: true, workersOnline: 1, workerReady: false, ready: false });
+    await expect(startResearch(db(), keyed, owner, RICH, idem())).rejects.toMatchObject({ code: "live_not_configured", message: expect.stringMatching(/worker/i) });
+    expect(await db().select().from(researchJobs)).toHaveLength(0);
+
+    // With no worker online the run is accepted and waits in the queue.
+    await db().delete(workerHeartbeats);
+    expect(await getLiveReadiness(db(), keyed)).toEqual({ configured: true, workersOnline: 0, workerReady: null, ready: true });
+
+    // Workers with the keys (and older workers that do not report it) accept runs.
+    await checkIn("worker-a", true);
+    await checkIn("worker-b", null);
+    expect(await getLiveReadiness(db(), keyed)).toEqual({ configured: true, workersOnline: 2, workerReady: true, ready: true });
+    await expect(startResearch(db(), keyed, owner, RICH, idem())).resolves.toMatchObject({ jobId: expect.any(String) });
+
+    // A worker that stopped checking in no longer counts.
+    await db().update(workerHeartbeats).set({ lastSeenAt: new Date(Date.now() - 5 * 60_000) });
+    expect((await getLiveReadiness(db(), keyed)).workersOnline).toBe(0);
   });
 
   it("demo and live workspaces never share profiles", async () => {

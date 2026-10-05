@@ -860,6 +860,8 @@ export const workerHeartbeats = pgTable("worker_heartbeats", {
   lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull(),
   activeJobs: integer("active_jobs").notNull().default(0),
   version: text("version"),
+  /** Whether this worker has both research provider keys (null: older worker that does not report it). */
+  liveReady: boolean("live_ready"),
 });
 
 /* -------------------------------------------------------------------------- */

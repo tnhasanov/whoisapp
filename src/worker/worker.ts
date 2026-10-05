@@ -3,7 +3,7 @@ import { hostname } from "node:os";
 import { and, eq, lt, sql } from "drizzle-orm";
 import type { Database } from "@/lib/db/client";
 import { appRateLimits, users, workerHeartbeats } from "@/lib/db/schema";
-import type { Env } from "@/lib/env";
+import { getProviderStatus, type Env } from "@/lib/env";
 import { claimNextJob, heartbeat, releaseLease, sweepStaleJobs, type JobRow } from "@/lib/jobs/store";
 import { checkPushReceipts, dispatchPushNotifications } from "@/lib/push/dispatch";
 import { purgeExpiredCache } from "@/lib/research/cache";
@@ -178,8 +178,17 @@ export class ResearchWorker {
       this.lastPresence = now;
       await this.db
         .insert(workerHeartbeats)
-        .values({ workerId: this.workerId, hostname: hostname(), startedAt: this.startedAt, lastSeenAt: new Date(), activeJobs: this.active.size, version: process.env.npm_package_version ?? null })
-        .onConflictDoUpdate({ target: workerHeartbeats.workerId, set: { lastSeenAt: new Date(), activeJobs: this.active.size } });
+        .values({
+          workerId: this.workerId,
+          hostname: hostname(),
+          startedAt: this.startedAt,
+          lastSeenAt: new Date(),
+          activeJobs: this.active.size,
+          version: process.env.npm_package_version ?? null,
+          // Configured/missing only, so the website can tell when this worker lacks the keys it has.
+          liveReady: getProviderStatus(this.env).liveReady,
+        })
+        .onConflictDoUpdate({ target: workerHeartbeats.workerId, set: { lastSeenAt: new Date(), activeJobs: this.active.size, liveReady: getProviderStatus(this.env).liveReady } });
     }
     if (now - this.lastSweep > 30_000) {
       this.lastSweep = now;

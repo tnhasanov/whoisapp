@@ -77,7 +77,14 @@ export const SettingsResponseSchema = z.object({
         /** Configured / missing only — key values never leave the server. */
         search: z.object({ name: z.string(), configured: z.boolean() }),
         model: z.object({ name: z.string(), configured: z.boolean(), model: z.string(), effort: z.string() }),
+        /** Live research can be started (keys on the server and no online worker missing them). */
         liveReady: z.boolean(),
+        /**
+         * Whether the online research workers have both keys: false means a worker
+         * needs a restart/redeploy to pick them up; null when none is online or
+         * none reports it. Added in v1 (optional for older servers).
+         */
+        workerKeys: z.boolean().nullable().optional(),
         directFetch: z.boolean(),
       }),
       limits: z.object({
