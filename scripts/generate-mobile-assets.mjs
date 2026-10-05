@@ -1,11 +1,12 @@
 /**
- * Renders the native app icon, Android adaptive/monochrome icons, splash mark
- * and notification icon for apps/mobile from the PersonBrief mark (the same
+ * Renders the native app icon, Android adaptive/monochrome icons, splash mark,
+ * notification icon and Google Play listing graphics for apps/mobile from the
+ * PersonBrief mark (the same
  * drawing as src/components/brand.tsx and scripts/generate-app-icons.mjs).
  * Run after changing the brand: `node scripts/generate-mobile-assets.mjs`
  * (needs Playwright's Chromium; outputs are committed).
  */
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { chromium } from "@playwright/test";
 
@@ -61,7 +62,34 @@ const ASSETS = [
   ["favicon.png", 48, svg(48, `${gradientDefs()}<rect width="48" height="48" rx="11" fill="url(#g)"/>${mark({ size: 48, markHeight: 0.56 })}`)],
 ];
 
+// Store listing graphics (Google Play): 512 px icon and the 1024 × 500 feature graphic.
+const storeOut = path.join(root, "apps/mobile/store");
+// Embedded: a page set from a string cannot load file:// fonts.
+const fontUrl = (file) => `data:font/ttf;base64,${readFileSync(path.join(root, "assets/fonts", file)).toString("base64")}`;
+const STORE = [
+  ["play-icon-512.png", 512, 512, svg(512, `${gradientDefs()}<rect width="512" height="512" fill="url(#g)"/>${mark({ size: 512, markHeight: 0.5 })}`)],
+  [
+    "play-feature-graphic.png",
+    1024,
+    500,
+    `<style>
+      @font-face { font-family: Serif; src: url("${fontUrl("SourceSerif4_600SemiBold.ttf")}"); }
+      @font-face { font-family: Sans; src: url("${fontUrl("Inter_500Medium.ttf")}"); }
+      .card { width: 1024px; height: 500px; display: flex; align-items: center; gap: 56px; padding: 0 88px; box-sizing: border-box;
+        background: radial-gradient(120% 140% at 18% 12%, #26324f 0%, ${INK} 55%, #0d1220 100%); color: ${CANVAS}; }
+      h1 { font: 600 76px/1 Serif; letter-spacing: -1.5px; margin: 0; }
+      h1 span { color: #7f9cf0; }
+      p { font: 500 27px/1.35 Sans; margin: 22px 0 0; color: #c9cfdb; max-width: 560px; }
+    </style>
+    <div class="card">
+      <svg width="200" height="200" viewBox="0 0 200 200">${gradientDefs()}<rect width="200" height="200" rx="46" fill="url(#g)" stroke="#33405f" stroke-width="2"/>${mark({ size: 200, markHeight: 0.56 })}</svg>
+      <div><h1>PersonBrief<span>.</span></h1><p>Evidence-backed briefs for professional meetings, from permitted public sources.</p></div>
+    </div>`,
+  ],
+];
+
 mkdirSync(out, { recursive: true });
+mkdirSync(storeOut, { recursive: true });
 const browser = await chromium.launch(existsSync("/opt/pw-browsers/chromium") ? { executablePath: "/opt/pw-browsers/chromium" } : {});
 const page = await browser.newPage();
 for (const [name, size, markup] of ASSETS) {
@@ -70,5 +98,12 @@ for (const [name, size, markup] of ASSETS) {
   const opaque = name === "icon.png" || name === "adaptive-background.png";
   writeFileSync(path.join(out, name), await page.screenshot({ omitBackground: !opaque, clip: { x: 0, y: 0, width: size, height: size } }));
   console.log("wrote", path.relative(root, path.join(out, name)));
+}
+for (const [name, width, height, markup] of STORE) {
+  await page.setViewportSize({ width, height });
+  await page.setContent(`<!doctype html><html><body style="margin:0">${markup}</body></html>`, { waitUntil: "load" });
+  await page.evaluate(() => document.fonts.ready);
+  writeFileSync(path.join(storeOut, name), await page.screenshot({ clip: { x: 0, y: 0, width, height } }));
+  console.log("wrote", path.relative(root, path.join(storeOut, name)));
 }
 await browser.close();

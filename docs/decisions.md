@@ -93,8 +93,71 @@ Short records of the choices that shape PersonBrief. Newest last.
     installs from the browser on iPhone and Android with no store review or
     developer accounts, and every release reaches it immediately. Native store
     apps (for example a Capacitor wrapper) remain possible later and would need
-    Apple and Google developer accounts.
+    Apple and Google developer accounts. *(Extended by 25: the PWA stays, and a
+    native app now exists alongside it.)*
 24. **The service worker never stores private data.** It caches only hashed
     build assets, icons and a static offline screen; pages, API responses and
     exports always come from the network. The cache is named after the build,
     so each release replaces it.
+25. **A native phone app with Expo, next to the website and the PWA.** Expo
+    SDK 57 (React Native 0.86, Expo Router) in `apps/mobile`, with native
+    screens and no WebView. It is a client of the same server and database;
+    the website, PWA, research engine and Render deployment are unchanged.
+26. **Shared code by path alias, not npm workspaces.** Pure contracts (API
+    schemas, domain types, formatting, design tokens, app schemes) live in
+    `packages/shared` and are resolved through the `@personbrief/shared/*`
+    alias by TypeScript, Vitest, esbuild, Metro and Jest. The app keeps its own
+    `package-lock.json`, so its dependencies never enter the website's install
+    or Render build, and shared code imports only `zod`.
+27. **A versioned API for apps (`/api/v1`).** It reuses the server's services
+    and owner checks (ownership always comes from the session). Conventions:
+    one error envelope with typed codes, `Idempotency-Key` on anything that
+    starts paid research, cursor pagination, UTC timestamps, lenient enums so
+    older apps survive new values, additive changes only within v1, and a
+    client build header that lets the server answer 426 "update the app".
+28. **App sign-in through Better Auth's own Expo integration.** The session
+    cookie is stored in the Keychain/Keystore (SecureStore) and sent as a
+    header; the app identifies itself by its URL scheme. No second token
+    system. Only release schemes are trusted in production; development
+    schemes and Expo Go only outside it. The auth route is an allowlist (no
+    sign-up) with per-address and per-email rate limits.
+29. **Research content is never stored on the phone.** It lives in an
+    in-memory query cache that is cleared on sign-out and before another
+    account signs in; exports are temporary files deleted after sharing, at
+    sign-out and at launch. The app shows nothing while the server cannot
+    confirm the session.
+30. **Notifications through Expo's push service, sent by the worker.** Plain
+    HTTPS (no SDK), opt-in, tied to the session (removed with it), one
+    delivery per run and event, invalid tokens cleaned from tickets and
+    receipts, generic localized text without the person's name. Without an
+    Expo project id or push credentials the app says notifications are
+    unavailable; nothing is simulated. No marketing or scheduled monitoring.
+31. **Server-paced polling, no offline queue.** The run endpoint returns
+    `pollAfterMs`; polling pauses in the background and the app reconciles on
+    return. New research is refused while offline rather than queued, because
+    it costs money.
+32. **Optional app lock.** Face ID, Touch ID or fingerprint with the device
+    passcode as fallback; the app relocks after a minute in the background and
+    covers its content in the app switcher. It protects the phone, it does not
+    replace signing in.
+33. **Custom URL schemes only for now.** Universal links and App Links need
+    verification files on a domain the project controls permanently; they wait
+    until the production address is final.
+34. **The worker reports whether it has the provider keys.** On Render the
+    worker copies the keys from the website when it deploys, so it can lag
+    behind. The heartbeat carries a configured/missing flag (never the values),
+    and the website refuses live research with a clear message while an online
+    worker lacks keys, instead of letting runs fail later.
+35. **Render settings.** Heap caps in the start commands (not during builds),
+    explicit 1 GB database storage, and build filters so commits that only
+    touch `apps/mobile` or `docs` do not redeploy the services.
+36. **TypeScript 6 in the app.** The Expo SDK 57 toolchain uses it; the
+    website stays on 5.9 until typescript-eslint supports newer versions (20).
+37. **A public `/privacy` page.** The stores require a public privacy-policy
+    address. The page repeats the data-use commitments and adds accounts, the
+    phone app and how people who were researched can ask for corrections; a
+    contact appears only when the operator sets `SUPPORT_EMAIL`.
+38. **Screens reviewed through Expo's web target; device checks scripted.**
+    Without an emulator here, phone-sized renders of the real screens were used
+    for review (and are labelled as such), and Maestro flows are provided for
+    running the same journeys on devices.

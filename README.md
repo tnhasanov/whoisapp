@@ -27,6 +27,7 @@ guessed data.
 | Fictional demo workspace and guest demo | Implemented, tested |
 | Live research with Tavily + Anthropic | Implemented and unit-tested against the SDKs; **not live-tested** (no keys in the build environment) |
 | Installable phone app (home screen, launch screens, offline screen, bottom sheets, share sheet) | Implemented, browser-tested on phone viewports |
+| Native iPhone and Android app (`apps/mobile`, Expo) on the same server through `/api/v1` | Implemented; component- and live-server-tested, release bundles built; **not yet run on a device or emulator**, no signed builds (needs your Expo/Apple/Google accounts) |
 | Hosted deployment | Render Blueprint and Docker configuration provided; **not deployed yet** (needs your Render account) |
 
 See [docs/implementation-status.md](docs/implementation-status.md) for the
@@ -114,6 +115,9 @@ DATABASE_URL=$E2E_DATABASE_URL APP_URL=http://localhost:3100 FIXTURE_LATENCY_MS=
 E2E_DATABASE_URL=… npm run test:e2e             # also writes docs/screenshots/*
 ```
 
+Phone app: `cd apps/mobile && npm ci && npm run typecheck && npm run lint && npm test`
+(details in [docs/mobile-testing.md](docs/mobile-testing.md)).
+
 ## Deployment
 
 **Easiest: Render.** `render.yaml` describes the website, the research worker
@@ -128,7 +132,20 @@ app, but the worker must run on a host that keeps a process alive.
 
 ## On your phone
 
-PersonBrief is an installable web app: add it to the home screen (Safari →
+There are two ways to use PersonBrief on a phone, both on the same account
+and data:
+
+- **Native app** (`apps/mobile`, Expo SDK 57): native screens for search,
+  choosing the person, progress, the brief and its evidence, saved work and
+  settings; sign-in kept in the phone's keychain; optional Face ID /
+  fingerprint lock and research notifications. Setup and builds:
+  [docs/mobile-setup.md](docs/mobile-setup.md); testing:
+  [docs/mobile-testing.md](docs/mobile-testing.md); store drafts and privacy
+  answers: [docs/mobile-store.md](docs/mobile-store.md); screens:
+  [docs/screenshots/mobile-app](docs/screenshots/mobile-app/).
+- **Installable web app**, described below.
+
+PersonBrief's website is also an installable web app: add it to the home screen (Safari →
 Share → Add to Home Screen; Chrome → Install app) and it opens full-screen
 with its own icon and launch screen. On phones the evidence opens as a bottom
 sheet you can swipe away, nested screens have a back button, and PDFs can be
@@ -147,6 +164,10 @@ src/lib/{names,contacts,dates,evidence,media,diff,urls}/   deterministic rules
 src/lib/export/          PDF and JSON exports
 src/worker/              research worker process
 src/fixtures/            fictional demo world (reserved .example domains, fictional numbers)
+src/app/api/v1/          versioned API for the phone app
+src/lib/push/            research notifications (Expo push service, sent by the worker)
+packages/shared/         contracts shared by website, worker and app (API schemas, types, formatting)
+apps/mobile/             native iPhone/Android app (Expo; own package.json, not built by Render)
 messages/                en, az, ru interface text
 drizzle/                 SQL migrations
 tests/{unit,integration,e2e}/
@@ -159,5 +180,6 @@ Research data is private to the owner account and excluded from indexing.
 Retrieved page text is kept for `SOURCE_CONTENT_RETENTION_DAYS` (default 14);
 briefs keep only short supporting excerpts. Deleting a profile removes its
 snapshots, sources, notes, tags, exports and the research runs behind it. The
-in-app **Data use & privacy** page explains this in plain language, and every
-profile has a **Report an issue** form for corrections.
+in-app **Data use & privacy** page explains this in plain language (a public
+version, including the phone app, is at `/privacy`), and every profile has a
+**Report an issue** form for corrections.
