@@ -1,0 +1,203 @@
+{
+  "tabs": {
+    "search": "Search",
+    "saved": "Saved",
+    "activity": "Activity",
+    "settings": "Settings"
+  },
+  "titles": {
+    "research": "Research",
+    "brief": "Brief",
+    "notes": "Notes & tags",
+    "changes": "What changed?",
+    "report": "Report an issue",
+    "fictionalSource": "Fictional source",
+    "sessions": "Signed-in devices",
+    "dataUse": "Data use & privacy",
+    "notFound": "Not found"
+  },
+  "welcome": {
+    "pointResearch": "Evidence-backed briefs from permitted public sources",
+    "pointEvidence": "Every fact opens the exact excerpt it came from",
+    "pointPrivate": "Private to your account — no public sign-up",
+    "expiredTitle": "Your session ended",
+    "expiredBody": "It expired or was signed out from another device. Sign in again to continue.",
+    "signedOut": "You are signed out. Research data and temporary files were removed from this phone.",
+    "offline": "No connection to the server. Check your internet connection and try again.",
+    "failed": "Sign-in did not complete. Please try again.",
+    "version": "Version {version} ({build})"
+  },
+  "offline": {
+    "title": "You're offline",
+    "body": "Showing what is already open. New research, saving and exports need a connection — nothing is queued while offline."
+  },
+  "errors": {
+    "offlineTitle": "No connection",
+    "offlineBody": "The server could not be reached. Check your connection and try again.",
+    "timeoutTitle": "The server is taking too long",
+    "timeoutBody": "It may be starting up or busy. Research already running continues on the server; try again in a moment.",
+    "incompatibleTitle": "Update the app",
+    "incompatibleBody": "The server sent data this version of the app does not understand. Install the latest version.",
+    "configTitle": "Server not configured",
+    "configBody": "This build has no valid server address.",
+    "notFoundTitle": "Not available",
+    "notFoundBody": "It was deleted, or it belongs to a different account.",
+    "sessionTitle": "Signed out",
+    "sessionBody": "Your session ended. Sign in again to continue.",
+    "rateLimitedTitle": "Please wait",
+    "providersTitle": "Live research is not set up",
+    "forbiddenTitle": "Not available for this account",
+    "forbiddenBody": "This account cannot do that.",
+    "changedTitle": "This has changed",
+    "genericTitle": "Something went wrong",
+    "genericBody": "Please try again. If it keeps happening, the server may be unavailable."
+  },
+  "system": {
+    "misconfiguredTitle": "Server address missing",
+    "misconfiguredBody": "This build of PersonBrief does not know which server to use.",
+    "missing": "Set EXPO_PUBLIC_API_URL for the {variant} build (see docs/mobile-setup.md).",
+    "insecure": "Preview and store builds only connect to an https:// server.",
+    "invalid": "The configured server address is not a valid URL.",
+    "upgradeTitle": "Please update PersonBrief",
+    "upgradeBody": "This version of the app is no longer supported by the server. Install the latest version to continue.",
+    "unreachableTitle": "Can't reach PersonBrief",
+    "unreachableBody": "You are still signed in on this phone, but the server could not be reached. Nothing is shown until it can be loaded from the server.",
+    "retry": "Try again",
+    "signOut": "Sign out of this phone"
+  },
+  "lock": {
+    "title": "PersonBrief is locked",
+    "body": "Unlock with Face ID, Touch ID, your fingerprint or the device passcode.",
+    "failed": "Not unlocked. Try again, or sign out — you can sign in again with your password.",
+    "prompt": "Unlock PersonBrief",
+    "unlock": "Unlock",
+    "signOut": "Sign out instead"
+  },
+  "search": {
+    "title": "Research",
+    "offlineNoResearch": "You're offline. Connect to start research — searches are never queued offline.",
+    "exampleHint": "Fills in the search form"
+  },
+  "research": {
+    "kindRefresh": "Refresh",
+    "kindRetry": "Retry"
+  },
+  "activity": {
+    "filter": "Show",
+    "all": "All",
+    "active": "In progress",
+    "finished": "Finished",
+    "keep": "Keep"
+  },
+  "brief": {
+    "share": "Share",
+    "shareMessage": "The file is created for your account and handed to the share sheet. Once shared to another app, that copy is outside PersonBrief.",
+    "shareUnavailable": "Sharing is not available on this device.",
+    "notesWarning": "Includes your private notes",
+    "notesAndTags": "Notes & tags",
+    "notesSummary": "{notes, plural, =0 {No notes} one {# private note} other {# private notes}} · {tags, plural, =0 {no tags} one {# tag} other {# tags}}",
+    "versions": "Versions",
+    "oneVersion": "Refresh the profile to create a second version.",
+    "roleEvidenceHint": "Opens the evidence for this role",
+    "demoBrief": "Fictional demo data — every person, organisation, source and contact here is invented."
+  },
+  "contacts": {
+    "call": "Call",
+    "email": "Email",
+    "open": "Open",
+    "copy": "Copy",
+    "evidenceHint": "Opens where this contact was published",
+    "fictionalContact": "Fictional demo contact — calling and emailing are disabled."
+  },
+  "notes": {
+    "newNote": "New note",
+    "noTags": "No tags yet.",
+    "deleteTitle": "Delete this note?",
+    "deleteBody": "The note is removed from this profile on every device."
+  },
+  "changes": {
+    "pickHint": "Choose a version to compare."
+  },
+  "saved": {
+    "title": "Saved",
+    "scope": "Show"
+  },
+  "settings": {
+    "account": "Account",
+    "guestAccount": "Temporary demo visitor",
+    "fictional": "fictional",
+    "workspaceHint": "The same setting as on the website. The demo workspace only contains invented people and sources.",
+    "phone": "On this phone",
+    "phoneHint": "These settings apply to this phone only and are removed when you sign out.",
+    "push": {
+      "title": "Research notifications",
+      "on": "On — a short notice when research finishes or needs your choice. The person's name is never shown.",
+      "off": "Off",
+      "lastFailed": "The last notification could not be delivered ({error}).",
+      "unavailable": {
+        "web": "Not available in the web preview.",
+        "simulator": "Push notifications need a physical phone.",
+        "no_project": "Not available in this build: it is not linked to an Expo project with push credentials yet.",
+        "server_disabled": "Turned off on the server."
+      },
+      "failed": {
+        "denied": "Notifications are not allowed for PersonBrief. Allow them in the phone's Settings.",
+        "token_failed": "This phone could not get a push token. Push credentials may not be set up for this build.",
+        "server": "The server could not register this phone. Try again later.",
+        "web": "Not available in the web preview.",
+        "simulator": "Push notifications need a physical phone.",
+        "no_project": "Not available in this build.",
+        "server_disabled": "Turned off on the server."
+      }
+    },
+    "channelName": "Research updates",
+    "lock": {
+      "title": "App lock",
+      "on": "On — Face ID, Touch ID or fingerprint, with the device passcode as fallback.",
+      "off": "Off",
+      "noHardware": "This phone has no biometric unlock.",
+      "notEnrolled": "Set up Face ID, Touch ID or a fingerprint in the phone's Settings first.",
+      "confirm": "Confirm it's you"
+    },
+    "setupOnServer": "Live research needs TAVILY_API_KEY and ANTHROPIC_API_KEY on the server (web service and worker). Keys are never shown in the app.",
+    "limitsHint": "Hard budgets for each run, set on the server. They can be lowered on the website.",
+    "maxJobsPerHour": "Live runs per hour",
+    "noUsage": "No provider usage in the last 30 days.",
+    "security": "Session & privacy",
+    "sessions": "Signed-in devices",
+    "sessionsHint": "See where this account is signed in and sign other devices out",
+    "deviceZone": "This phone's time zone",
+    "signOut": "Sign out",
+    "signOutTitle": "Sign out of PersonBrief?",
+    "signOutBody": "This phone's session is revoked on the server, notifications are turned off, and research data and temporary files are removed from the phone.",
+    "cancel": "Cancel"
+  },
+  "sessions": {
+    "intro": "Every browser and phone signed in to this account. Signing one out takes effect immediately.",
+    "details": "Signed in {created} · last refreshed {active} · expires {expires}",
+    "thisDevice": "This phone",
+    "revoke": "Sign out",
+    "revokeTitle": "Sign out this device?",
+    "revokeBody": "It will need the password to sign in again.",
+    "revokeOthers": "Sign out all other devices",
+    "revokedOthers": "{count, plural, =0 {No other devices were signed in.} one {# device was signed out.} other {# devices were signed out.}}",
+    "signOutHere": "Sign out of this phone",
+    "expiryNote": "Sessions end after 7 days without use. Signing out on this phone also turns off its notifications.",
+    "cancel": "Cancel"
+  },
+  "dataUse": {
+    "phoneTitle": "On this phone",
+    "sessionTitle": "Sign-in",
+    "sessionBody": "Only the session cookie is stored, in the phone's secure keychain/keystore. Your password is never stored.",
+    "contentTitle": "Research",
+    "contentBody": "Briefs, sources and notes are loaded from your server and kept in memory while the app runs. There is no offline copy on the phone.",
+    "exportsTitle": "Exports",
+    "exportsBody": "PDF and JSON files are created for your account, placed in a private temporary folder and deleted after sharing, at the next launch and on sign-out.",
+    "sharedTitle": "Files you share",
+    "sharedBody": "A file you send to another app (Mail, Files, a chat) becomes that app's copy. PersonBrief cannot delete it.",
+    "notificationsTitle": "Notifications",
+    "notificationsBody": "Optional. They only say that research finished or needs your choice — never who was researched — and stop when you sign out.",
+    "lockTitle": "App lock",
+    "lockBody": "Optional. Face ID, Touch ID or a fingerprint hides the app on this phone; it does not replace signing in."
+  }
+}

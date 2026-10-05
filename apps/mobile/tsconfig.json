@@ -1,0 +1,39 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@personbrief/shared/*": [
+        "../../packages/shared/src/*"
+      ],
+      "@personbrief/messages/*": [
+        "../../messages/*"
+      ],
+      "zod": [
+        "./node_modules/zod"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "../../packages/shared/src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist-web",
+    ".bundle-check",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js",
+    "eslint.config.js",
+    "android",
+    "ios"
+  ]
+}

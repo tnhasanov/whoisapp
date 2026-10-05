@@ -1,0 +1,203 @@
+{
+  "tabs": {
+    "search": "Axtarış",
+    "saved": "Saxlanılanlar",
+    "activity": "Fəaliyyət",
+    "settings": "Parametrlər"
+  },
+  "titles": {
+    "research": "Araşdırma",
+    "brief": "Arayış",
+    "notes": "Qeydlər və teqlər",
+    "changes": "Nə dəyişdi?",
+    "report": "Problem barədə bildirin",
+    "fictionalSource": "Uydurma mənbə",
+    "sessions": "Daxil olunmuş cihazlar",
+    "dataUse": "Məlumatların istifadəsi və məxfilik",
+    "notFound": "Tapılmadı"
+  },
+  "welcome": {
+    "pointResearch": "İcazə verilən açıq mənbələrə əsaslanan, sübutlarla dəstəklənən arayışlar",
+    "pointEvidence": "Hər fakt götürüldüyü dəqiq sitatı açır",
+    "pointPrivate": "Yalnız sizin hesabınız üçün — açıq qeydiyyat yoxdur",
+    "expiredTitle": "Sessiyanız başa çatıb",
+    "expiredBody": "Sessiyanın müddəti bitib və ya başqa cihazdan çıxış edilib. Davam etmək üçün yenidən daxil olun.",
+    "signedOut": "Hesabdan çıxdınız. Araşdırma məlumatları və müvəqqəti fayllar bu telefondan silindi.",
+    "offline": "Serverlə əlaqə yoxdur. İnternet bağlantınızı yoxlayıb yenidən cəhd edin.",
+    "failed": "Giriş tamamlanmadı. Yenidən cəhd edin.",
+    "version": "Versiya {version} ({build})"
+  },
+  "offline": {
+    "title": "Siz oflaynsınız",
+    "body": "Artıq açılmış məlumat göstərilir. Yeni araşdırma, yadda saxlama və ixrac üçün bağlantı lazımdır — oflayn rejimdə heç nə növbəyə qoyulmur."
+  },
+  "errors": {
+    "offlineTitle": "Bağlantı yoxdur",
+    "offlineBody": "Serverə qoşulmaq mümkün olmadı. Bağlantını yoxlayıb yenidən cəhd edin.",
+    "timeoutTitle": "Server çox gec cavab verir",
+    "timeoutBody": "Server işə düşür və ya məşğuldur. Artıq gedən araşdırma serverdə davam edir; bir az sonra yenidən cəhd edin.",
+    "incompatibleTitle": "Tətbiqi yeniləyin",
+    "incompatibleBody": "Server tətbiqin bu versiyasının başa düşmədiyi məlumat göndərdi. Ən son versiyanı quraşdırın.",
+    "configTitle": "Server konfiqurasiya edilməyib",
+    "configBody": "Bu yığımda düzgün server ünvanı yoxdur.",
+    "notFoundTitle": "Mövcud deyil",
+    "notFoundBody": "Silinib və ya başqa hesaba aiddir.",
+    "sessionTitle": "Hesabdan çıxılıb",
+    "sessionBody": "Sessiyanız başa çatıb. Davam etmək üçün yenidən daxil olun.",
+    "rateLimitedTitle": "Bir az gözləyin",
+    "providersTitle": "Canlı araşdırma qurulmayıb",
+    "forbiddenTitle": "Bu hesab üçün əlçatan deyil",
+    "forbiddenBody": "Bu hesab bu əməliyyatı edə bilməz.",
+    "changedTitle": "Bu dəyişib",
+    "genericTitle": "Xəta baş verdi",
+    "genericBody": "Yenidən cəhd edin. Təkrarlanarsa, server əlçatan olmaya bilər."
+  },
+  "system": {
+    "misconfiguredTitle": "Server ünvanı yoxdur",
+    "misconfiguredBody": "PersonBrief-in bu yığımı hansı serverdən istifadə edəcəyini bilmir.",
+    "missing": "{variant} yığımı üçün EXPO_PUBLIC_API_URL dəyərini təyin edin (docs/mobile-setup.md-ə baxın).",
+    "insecure": "Önizləmə və mağaza yığımları yalnız https:// serverinə qoşulur.",
+    "invalid": "Təyin edilmiş server ünvanı düzgün URL deyil.",
+    "upgradeTitle": "PersonBrief-i yeniləyin",
+    "upgradeBody": "Tətbiqin bu versiyasını server artıq dəstəkləmir. Davam etmək üçün ən son versiyanı quraşdırın.",
+    "unreachableTitle": "PersonBrief-ə qoşulmaq mümkün deyil",
+    "unreachableBody": "Bu telefonda hələ də hesabınızdasınız, lakin serverə qoşulmaq alınmadı. Serverdən yüklənənə qədər heç nə göstərilmir.",
+    "retry": "Yenidən cəhd edin",
+    "signOut": "Bu telefonda hesabdan çıxın"
+  },
+  "lock": {
+    "title": "PersonBrief kilidlidir",
+    "body": "Face ID, Touch ID, barmaq izi və ya cihaz şifrəsi ilə kilidi açın.",
+    "failed": "Kilid açılmadı. Yenidən cəhd edin və ya hesabdan çıxın — sonra parolunuzla yenidən daxil ola bilərsiniz.",
+    "prompt": "PersonBrief-in kilidini açın",
+    "unlock": "Kilidi açın",
+    "signOut": "Əvəzində hesabdan çıxın"
+  },
+  "search": {
+    "title": "Araşdırma",
+    "offlineNoResearch": "Siz oflaynsınız. Araşdırmaya başlamaq üçün internetə qoşulun — axtarışlar oflayn rejimdə heç vaxt növbəyə qoyulmur.",
+    "exampleHint": "Axtarış formasını doldurur"
+  },
+  "research": {
+    "kindRefresh": "Yeniləmə",
+    "kindRetry": "Təkrar cəhd"
+  },
+  "activity": {
+    "filter": "Göstərin",
+    "all": "Hamısı",
+    "active": "Gedən",
+    "finished": "Bitmiş",
+    "keep": "Saxlayın"
+  },
+  "brief": {
+    "share": "Paylaşın",
+    "shareMessage": "Fayl hesabınız üçün yaradılır və paylaşma pəncərəsinə ötürülür. Başqa tətbiqə göndərildikdən sonra o nüsxə PersonBrief-dən kənardadır.",
+    "shareUnavailable": "Bu cihazda paylaşma mümkün deyil.",
+    "notesWarning": "Şəxsi qeydləriniz daxildir",
+    "notesAndTags": "Qeydlər və teqlər",
+    "notesSummary": "{notes, plural, =0 {Qeyd yoxdur} other {# şəxsi qeyd}} · {tags, plural, =0 {teq yoxdur} other {# teq}}",
+    "versions": "Versiyalar",
+    "oneVersion": "İkinci versiya yaratmaq üçün profili yeniləyin.",
+    "roleEvidenceHint": "Bu vəzifə üçün sübutları açır",
+    "demoBrief": "Uydurma demo məlumatı — buradakı bütün şəxslər, təşkilatlar, mənbələr və əlaqələr uydurmadır."
+  },
+  "contacts": {
+    "call": "Zəng",
+    "email": "E-poçt",
+    "open": "Açın",
+    "copy": "Kopyalayın",
+    "evidenceHint": "Bu əlaqənin dərc olunduğu yeri açır",
+    "fictionalContact": "Uydurma demo əlaqəsi — zəng və e-poçt söndürülüb."
+  },
+  "notes": {
+    "newNote": "Yeni qeyd",
+    "noTags": "Hələ teq yoxdur.",
+    "deleteTitle": "Bu qeyd silinsin?",
+    "deleteBody": "Qeyd bütün cihazlarda bu profildən silinəcək."
+  },
+  "changes": {
+    "pickHint": "Müqayisə üçün versiya seçin."
+  },
+  "saved": {
+    "title": "Saxlanılanlar",
+    "scope": "Göstərin"
+  },
+  "settings": {
+    "account": "Hesab",
+    "guestAccount": "Müvəqqəti demo qonağı",
+    "fictional": "uydurma",
+    "workspaceHint": "Veb saytdakı ilə eyni parametrdir. Demo iş sahəsində yalnız uydurma şəxslər və mənbələr var.",
+    "phone": "Bu telefonda",
+    "phoneHint": "Bu parametrlər yalnız bu telefona aiddir və hesabdan çıxdıqda silinir.",
+    "push": {
+      "title": "Araşdırma bildirişləri",
+      "on": "Aktivdir — araşdırma bitdikdə və ya seçiminizi gözlədikdə qısa bildiriş. Şəxsin adı heç vaxt göstərilmir.",
+      "off": "Deaktivdir",
+      "lastFailed": "Son bildirişi çatdırmaq mümkün olmadı ({error}).",
+      "unavailable": {
+        "web": "Veb önizləmədə mövcud deyil.",
+        "simulator": "Push bildirişləri üçün real telefon lazımdır.",
+        "no_project": "Bu yığımda mövcud deyil: hələ push etimadnaməsi olan Expo layihəsinə qoşulmayıb.",
+        "server_disabled": "Serverdə söndürülüb."
+      },
+      "failed": {
+        "denied": "PersonBrief üçün bildirişlərə icazə verilməyib. Telefonun Parametrlərində icazə verin.",
+        "token_failed": "Bu telefon push tokeni ala bilmədi. Bu yığım üçün push etimadnaməsi qurulmamış ola bilər.",
+        "server": "Server bu telefonu qeydiyyata ala bilmədi. Sonra yenidən cəhd edin.",
+        "web": "Veb önizləmədə mövcud deyil.",
+        "simulator": "Push bildirişləri üçün real telefon lazımdır.",
+        "no_project": "Bu yığımda mövcud deyil.",
+        "server_disabled": "Serverdə söndürülüb."
+      }
+    },
+    "channelName": "Araşdırma yenilikləri",
+    "lock": {
+      "title": "Tətbiq kilidi",
+      "on": "Aktivdir — Face ID, Touch ID və ya barmaq izi; ehtiyat olaraq cihaz şifrəsi.",
+      "off": "Deaktivdir",
+      "noHardware": "Bu telefonda biometrik kilid açma yoxdur.",
+      "notEnrolled": "Əvvəlcə telefonun Parametrlərində Face ID, Touch ID və ya barmaq izi qurun.",
+      "confirm": "Siz olduğunuzu təsdiqləyin"
+    },
+    "setupOnServer": "Canlı araşdırma üçün serverdə (veb xidmət və işçi proses) TAVILY_API_KEY və ANTHROPIC_API_KEY lazımdır. Açarlar tətbiqdə heç vaxt göstərilmir.",
+    "limitsHint": "Hər icra üçün serverdə təyin edilmiş sərt limitlər. Onları veb saytda azalda bilərsiniz.",
+    "maxJobsPerHour": "Saatda canlı icra sayı",
+    "noUsage": "Son 30 gündə provayder istifadəsi olmayıb.",
+    "security": "Sessiya və məxfilik",
+    "sessions": "Daxil olunmuş cihazlar",
+    "sessionsHint": "Bu hesabın harada açıq olduğuna baxın və digər cihazlardan çıxış edin",
+    "deviceZone": "Bu telefonun saat qurşağı",
+    "signOut": "Hesabdan çıxın",
+    "signOutTitle": "PersonBrief-dən çıxılsın?",
+    "signOutBody": "Bu telefonun sessiyası serverdə ləğv ediləcək, bildirişlər söndürüləcək, araşdırma məlumatları və müvəqqəti fayllar telefondan silinəcək.",
+    "cancel": "Ləğv edin"
+  },
+  "sessions": {
+    "intro": "Bu hesaba daxil olmuş bütün brauzerlər və telefonlar. Birindən çıxış dərhal qüvvəyə minir.",
+    "details": "Daxil olub {created} · son yenilənmə {active} · bitir {expires}",
+    "thisDevice": "Bu telefon",
+    "revoke": "Çıxış edin",
+    "revokeTitle": "Bu cihazdan çıxılsın?",
+    "revokeBody": "Yenidən daxil olmaq üçün parol lazım olacaq.",
+    "revokeOthers": "Bütün digər cihazlardan çıxın",
+    "revokedOthers": "{count, plural, =0 {Başqa cihazda açıq sessiya yox idi.} other {# cihazdan çıxış edildi.}}",
+    "signOutHere": "Bu telefonda hesabdan çıxın",
+    "expiryNote": "İstifadə edilmədikdə sessiyalar 7 gündən sonra bitir. Bu telefonda çıxış edildikdə onun bildirişləri də söndürülür.",
+    "cancel": "Ləğv edin"
+  },
+  "dataUse": {
+    "phoneTitle": "Bu telefonda",
+    "sessionTitle": "Giriş",
+    "sessionBody": "Yalnız sessiya kukisi telefonun təhlükəsiz açar anbarında saxlanılır. Parolunuz heç vaxt saxlanılmır.",
+    "contentTitle": "Araşdırma",
+    "contentBody": "Arayışlar, mənbələr və qeydlər serverinizdən yüklənir və tətbiq işlədikcə yaddaşda saxlanılır. Telefonda oflayn nüsxə yoxdur.",
+    "exportsTitle": "İxrac",
+    "exportsBody": "PDF və JSON faylları hesabınız üçün yaradılır, şəxsi müvəqqəti qovluğa qoyulur və paylaşmadan sonra, növbəti açılışda və hesabdan çıxdıqda silinir.",
+    "sharedTitle": "Paylaşdığınız fayllar",
+    "sharedBody": "Başqa tətbiqə (Mail, Fayllar, mesajlaşma) göndərdiyiniz fayl həmin tətbiqin nüsxəsinə çevrilir. PersonBrief onu silə bilməz.",
+    "notificationsTitle": "Bildirişlər",
+    "notificationsBody": "İstəyə bağlıdır. Yalnız araşdırmanın bitdiyini və ya seçiminizi gözlədiyini bildirir — kimin araşdırıldığını heç vaxt yox — və hesabdan çıxdıqda dayanır.",
+    "lockTitle": "Tətbiq kilidi",
+    "lockBody": "İstəyə bağlıdır. Face ID, Touch ID və ya barmaq izi tətbiqi bu telefonda gizlədir; hesaba girişi əvəz etmir."
+  }
+}
