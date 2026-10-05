@@ -1,3 +1,4 @@
+import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
@@ -5,24 +6,44 @@ import { anonymous } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
 import { accounts, authRateLimits, sessions, users, verifications } from "@/lib/db/schema";
-import { getEnv } from "@/lib/env";
+import { getEnv, type Env } from "@/lib/env";
+import { AUTH_COOKIE_PREFIX, DEVELOPMENT_APP_SCHEMES, RELEASE_APP_SCHEMES } from "@personbrief/shared/app";
 
-export const SESSION_COOKIE_PREFIX = "personbrief";
+export const SESSION_COOKIE_PREFIX = AUTH_COOKIE_PREFIX;
+
+/**
+ * Auth endpoints reachable over HTTP at /api/auth/* (used by the mobile app;
+ * the website calls the same functions directly from server actions). Every
+ * other Better Auth endpoint answers 404: there is no sign-up, password reset,
+ * account linking or profile editing over HTTP.
+ */
+export const HTTP_AUTH_PATHS = ["/sign-in/email", "/sign-out", "/get-session", "/sign-in/anonymous", "/ok"] as const;
+
+/**
+ * Origins allowed to make cookie-authenticated auth requests. The mobile app
+ * identifies itself with its URL scheme (Better Auth's Expo plugin turns the
+ * app's expo-origin header into an Origin). Development schemes are never
+ * trusted by a production server.
+ */
+export function trustedOriginsFor(env: Env): string[] {
+  const extraOrigins = (env.TRUSTED_ORIGINS ?? "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean);
+  const appSchemes = [...RELEASE_APP_SCHEMES, ...(env.NODE_ENV === "production" ? [] : DEVELOPMENT_APP_SCHEMES)];
+  return [env.APP_URL, ...appSchemes.map((scheme) => `${scheme}://`), ...extraOrigins];
+}
 export const DEMO_EMAIL_DOMAIN = "demo.personbrief.invalid";
 
 function buildAuth() {
   const env = getEnv();
   const db = getDb();
-  const extraOrigins = (env.TRUSTED_ORIGINS ?? "")
-    .split(",")
-    .map((o) => o.trim())
-    .filter(Boolean);
 
   return betterAuth({
     appName: "PersonBrief",
     baseURL: env.APP_URL,
     secret: env.BETTER_AUTH_SECRET,
-    trustedOrigins: [env.APP_URL, ...extraOrigins],
+    trustedOrigins: trustedOriginsFor(env),
     database: drizzleAdapter(db, {
       provider: "pg",
       schema: {
@@ -65,6 +86,9 @@ function buildAuth() {
     advanced: {
       cookiePrefix: SESSION_COOKIE_PREFIX,
       useSecureCookies: env.APP_URL.startsWith("https://"),
+      // Explicit, so origin/CSRF checks also run under NODE_ENV=test (Better Auth skips them there by default).
+      disableOriginCheck: false,
+      disableCSRFCheck: false,
     },
     databaseHooks: {
       user: {
@@ -97,6 +121,8 @@ function buildAuth() {
             }),
           ]
         : []),
+      // Native app sessions: cookies stored in the device keychain/keystore by the app.
+      expo(),
       nextCookies(),
     ],
     telemetry: { enabled: false },

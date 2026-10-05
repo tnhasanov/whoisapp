@@ -10,6 +10,10 @@ const PUBLIC_PREFIXES = [
   "/sign-in",
   "/setup",
   "/api/health",
+  // Sign-in for the mobile app (only selected endpoints are reachable; see HTTP_AUTH_PATHS).
+  "/api/auth",
+  // Public compatibility check for installed apps.
+  "/api/v1/meta",
   "/robots.txt",
   "/favicon.ico",
   "/icon",
@@ -29,6 +33,12 @@ export function proxy(request: NextRequest) {
   }
   const session = getSessionCookie(request, { cookiePrefix: "personbrief" });
   if (!session) {
+    if (pathname.startsWith("/api/v1/")) {
+      return NextResponse.json(
+        { error: { code: "unauthenticated", message: "Sign in to continue." } },
+        { status: 401, headers: { "Cache-Control": "no-store" } },
+      );
+    }
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
     }

@@ -17,6 +17,8 @@ export function env() {
 }
 
 const TABLES = [
+  "push_deliveries",
+  "push_devices",
   "usage_records",
   "provider_cache",
   "export_log",

@@ -22,14 +22,17 @@ export type Viewer = {
   theme: "system" | "light" | "dark";
 };
 
+export type ResolvedSession = { viewer: Viewer; sessionId: string; expiresAt: Date };
+
 /**
- * The authenticated viewer for this request (deduplicated per request).
- * Authorisation decisions always derive from this server-side record.
+ * Resolve the signed-in viewer from request headers (the browser's cookies, or
+ * the Cookie header the mobile app sends). Authorisation decisions always
+ * derive from this server-side record, never from client-supplied ids.
  */
-export const getViewer = cache(async (): Promise<Viewer | null> => {
+export async function resolveSession(requestHeaders: Headers): Promise<ResolvedSession | null> {
   let session: Awaited<ReturnType<ReturnType<typeof getAuth>["api"]["getSession"]>> = null;
   try {
-    session = await getAuth().api.getSession({ headers: await headers() });
+    session = await getAuth().api.getSession({ headers: requestHeaders });
   } catch {
     return null;
   }
@@ -46,18 +49,25 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
     [settings] = await db.select().from(ownerSettings).where(eq(ownerSettings.userId, user.id));
   }
   return {
-    userId: user.id,
-    name: user.name,
-    email: user.email,
-    role,
-    isGuest: role !== "owner",
-    // Demo users are confined to the demo workspace regardless of stored settings.
-    workspace: role === "owner" ? settings.activeWorkspace : "demo",
-    locale: (LOCALES as readonly string[]).includes(settings.locale) ? settings.locale : "en",
-    timezone: settings.timezone || DEFAULT_TIMEZONE,
-    theme: settings.theme,
+    sessionId: session.session.id,
+    expiresAt: new Date(session.session.expiresAt),
+    viewer: {
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      role,
+      isGuest: role !== "owner",
+      // Demo users are confined to the demo workspace regardless of stored settings.
+      workspace: role === "owner" ? settings.activeWorkspace : "demo",
+      locale: (LOCALES as readonly string[]).includes(settings.locale) ? settings.locale : "en",
+      timezone: settings.timezone || DEFAULT_TIMEZONE,
+      theme: settings.theme,
+    },
   };
-});
+}
+
+/** The authenticated viewer for this request (deduplicated per request). */
+export const getViewer = cache(async (): Promise<Viewer | null> => (await resolveSession(await headers()))?.viewer ?? null);
 
 export async function requireViewer(): Promise<Viewer> {
   const viewer = await getViewer();

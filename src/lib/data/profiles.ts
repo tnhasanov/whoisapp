@@ -159,6 +159,9 @@ export type ProfileListOptions = {
   sort?: "recent" | "name" | "researched";
   tagId?: string | null;
   scope?: "saved" | "all";
+  /** Page size (default 200) and offset for paginated clients. */
+  limit?: number;
+  offset?: number;
 };
 
 export async function listProfiles(db: Database, ownerId: string, workspace: Workspace, options: ProfileListOptions = {}): Promise<ProfileListItem[]> {
@@ -182,12 +185,13 @@ export async function listProfiles(db: Database, ownerId: string, workspace: Wor
   if (options.tagId) {
     conditions.push(sql`EXISTS (SELECT 1 FROM profile_tags pt WHERE pt.profile_id = ${profiles.id} AND pt.tag_id = ${options.tagId})`);
   }
+  // The id tiebreaker keeps the order stable across pages.
   const order =
     options.sort === "name"
-      ? [asc(profiles.displayName)]
+      ? [asc(profiles.displayName), asc(profiles.id)]
       : options.sort === "researched"
-        ? [desc(profiles.lastResearchedAt)]
-        : [desc(sql`coalesce(${profiles.savedAt}, ${profiles.updatedAt})`)];
+        ? [sql`${profiles.lastResearchedAt} DESC NULLS LAST`, asc(profiles.id)]
+        : [desc(sql`coalesce(${profiles.savedAt}, ${profiles.updatedAt})`), asc(profiles.id)];
   const rows = await db
     .select({
       profile: profiles,
@@ -198,7 +202,8 @@ export async function listProfiles(db: Database, ownerId: string, workspace: Wor
     .leftJoin(snapshots, eq(snapshots.id, profiles.latestSnapshotId))
     .where(and(...conditions))
     .orderBy(...order)
-    .limit(200);
+    .limit(options.limit ?? 200)
+    .offset(options.offset ?? 0);
   const ids = rows.map((r) => r.profile.id);
   const tagRows = ids.length
     ? await db
@@ -243,23 +248,53 @@ export async function setSaved(db: Database, ownerId: string, profileId: string,
   return updated.length > 0;
 }
 
-export async function addNote(db: Database, ownerId: string, profileId: string, body: string): Promise<boolean> {
+const toNoteView = (n: typeof notes.$inferSelect): NoteView => ({ id: n.id, body: n.body, createdAt: n.createdAt.toISOString(), updatedAt: n.updatedAt.toISOString() });
+
+/** Add a private note to an owned profile; null when the profile is not the owner's or the text is empty. */
+export async function createNote(db: Database, ownerId: string, profileId: string, body: string): Promise<NoteView | null> {
   const text = body.trim().slice(0, 5000);
-  if (!text || !(await ownedProfile(db, ownerId, profileId))) return false;
-  await db.insert(notes).values({ profileId, ownerId, body: text });
-  return true;
+  if (!text || !(await ownedProfile(db, ownerId, profileId))) return null;
+  const [note] = await db.insert(notes).values({ profileId, ownerId, body: text }).returning();
+  return toNoteView(note);
+}
+
+export async function addNote(db: Database, ownerId: string, profileId: string, body: string): Promise<boolean> {
+  return (await createNote(db, ownerId, profileId, body)) !== null;
+}
+
+/** Edit a note; `profileId`, when given, must also match (the API addresses notes under their profile). */
+export async function editNote(db: Database, ownerId: string, noteId: string, body: string, profileId?: string): Promise<NoteView | null> {
+  const text = body.trim().slice(0, 5000);
+  if (!text) return null;
+  const [note] = await db
+    .update(notes)
+    .set({ body: text })
+    .where(and(eq(notes.id, noteId), eq(notes.ownerId, ownerId), profileId ? eq(notes.profileId, profileId) : undefined))
+    .returning();
+  return note ? toNoteView(note) : null;
 }
 
 export async function updateNote(db: Database, ownerId: string, noteId: string, body: string): Promise<boolean> {
-  const text = body.trim().slice(0, 5000);
-  if (!text) return false;
-  const updated = await db.update(notes).set({ body: text }).where(and(eq(notes.id, noteId), eq(notes.ownerId, ownerId))).returning({ id: notes.id });
-  return updated.length > 0;
+  return (await editNote(db, ownerId, noteId, body)) !== null;
 }
 
-export async function deleteNote(db: Database, ownerId: string, noteId: string): Promise<boolean> {
-  const deleted = await db.delete(notes).where(and(eq(notes.id, noteId), eq(notes.ownerId, ownerId))).returning({ id: notes.id });
+export async function deleteNote(db: Database, ownerId: string, noteId: string, profileId?: string): Promise<boolean> {
+  const deleted = await db
+    .delete(notes)
+    .where(and(eq(notes.id, noteId), eq(notes.ownerId, ownerId), profileId ? eq(notes.profileId, profileId) : undefined))
+    .returning({ id: notes.id });
   return deleted.length > 0;
+}
+
+/** Tags on one owned profile plus every tag in its workspace (for suggestions). */
+export async function profileTagState(db: Database, ownerId: string, profileId: string): Promise<{ tags: TagView[]; availableTags: TagView[] } | null> {
+  const profile = await ownedProfile(db, ownerId, profileId);
+  if (!profile) return null;
+  const [tagRows, allTags] = await Promise.all([
+    db.select({ id: tags.id, name: tags.name }).from(profileTags).innerJoin(tags, eq(tags.id, profileTags.tagId)).where(and(eq(profileTags.profileId, profile.id), eq(tags.ownerId, ownerId))).orderBy(asc(tags.name)),
+    listTags(db, ownerId, profile.workspace),
+  ]);
+  return { tags: tagRows, availableTags: allTags };
 }
 
 export async function addTag(db: Database, ownerId: string, profileId: string, rawName: string): Promise<boolean> {

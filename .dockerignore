@@ -12,3 +12,4 @@ blob-report
 coverage
 *.tsbuildinfo
 npm-debug.log*
+apps

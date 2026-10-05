@@ -960,5 +960,15 @@
     "hintBody": "Ana ekrandan tam ekran istifadə üçün onu quraşdırın.",
     "hintIos": "“Paylaş”, sonra “Ana ekrana əlavə et” seçin.",
     "dismiss": "Bağlayın"
+  },
+  "Push": {
+    "completedTitle": "Araşdırma tamamlandı",
+    "completedBody": "Arayış baxış üçün hazırdır.",
+    "partialTitle": "Araşdırma qismən nəticələrlə tamamlandı",
+    "partialBody": "Tapılanlara baxmaq üçün PersonBrief-i açın.",
+    "failedTitle": "Araşdırma başa çatmadı",
+    "failedBody": "Yenidən cəhd etmək üçün PersonBrief-i açın.",
+    "needsChoiceTitle": "Araşdırma seçiminizi gözləyir",
+    "needsChoiceBody": "Bir neçə nəfər uyğun gəlir. Kimi araşdırmaq istədiyinizi seçin."
   }
 }

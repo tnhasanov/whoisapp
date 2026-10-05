@@ -88,6 +88,11 @@ const EnvSchema = z.object({
   /** SSRF-protected direct page retrieval fallback (off by default). */
   DIRECT_FETCH_ENABLED: booleanFlag(false),
 
+  /** Research-completion notifications to signed-in phones, sent through the Expo push service. */
+  PUSH_NOTIFICATIONS_ENABLED: booleanFlag(true),
+  /** Expo access token; only needed when "enhanced push security" is enabled for the Expo project. */
+  EXPO_ACCESS_TOKEN: optionalString(),
+
   /** Simulated provider latency in the fictional demo (milliseconds per call). */
   FIXTURE_LATENCY_MS: intInRange(0, 10000, 350),
 });

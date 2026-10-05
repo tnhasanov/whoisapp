@@ -203,6 +203,49 @@ export async function listJobs(db: Database, ownerId: string, workspace: "live" 
   }));
 }
 
+export type JobPageItem = JobListItem & { query: JobView["query"] };
+
+/**
+ * Keyset-paginated research history (newest first). The cursor is the last
+ * item's (createdAt, id), so pages stay stable while new runs are added.
+ */
+export async function listJobsPage(
+  db: Database,
+  ownerId: string,
+  workspace: "live" | "demo",
+  options: { limit: number; after?: { createdAt: string; id: string } | null; statuses?: JobStatus[] | null },
+): Promise<{ items: JobPageItem[]; hasMore: boolean }> {
+  const after = options.after;
+  const rows = await db
+    .select()
+    .from(researchJobs)
+    .where(
+      and(
+        eq(researchJobs.ownerId, ownerId),
+        eq(researchJobs.workspace, workspace),
+        options.statuses && options.statuses.length > 0 ? inArray(researchJobs.status, options.statuses) : undefined,
+        // Compared at millisecond precision, the precision of the cursor's ISO timestamp.
+        after ? sql`(date_trunc('milliseconds', ${researchJobs.createdAt}), ${researchJobs.id}) < (${new Date(after.createdAt).toISOString()}::timestamptz, ${after.id}::uuid)` : undefined,
+      ),
+    )
+    .orderBy(desc(sql`date_trunc('milliseconds', ${researchJobs.createdAt})`), desc(researchJobs.id))
+    .limit(options.limit + 1);
+  const items = rows.slice(0, options.limit).map((j) => ({
+    id: j.id,
+    workspace: j.workspace,
+    kind: j.kind,
+    status: j.status,
+    outcome: j.outcome,
+    fullName: j.query.fullName,
+    company: j.query.company,
+    query: j.query,
+    profileId: j.profileId,
+    createdAt: j.createdAt.toISOString(),
+    finishedAt: j.finishedAt?.toISOString() ?? null,
+  }));
+  return { items, hasMore: rows.length > options.limit };
+}
+
 export async function recentSearches(db: Database, ownerId: string, workspace: "live" | "demo", limit = 6) {
   const rows = await db
     .select({ id: researchJobs.id, query: researchJobs.query, status: researchJobs.status, createdAt: researchJobs.createdAt, profileId: researchJobs.profileId, kind: researchJobs.kind })

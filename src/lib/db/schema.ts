@@ -31,7 +31,6 @@ import type {
   CoverageType,
   DatePrecision,
   EvidenceStatus,
-  IdentityResolutionMethod,
   IssueCategory,
   JobKind,
   JobPhase,
@@ -55,7 +54,18 @@ import type {
   Temporal,
   UserRole,
   Workspace,
-} from "@/lib/domain/types";
+} from "@personbrief/shared/domain";
+import type {
+  IdentityResolution,
+  JobUsageSummary,
+  ResearchLimits,
+  ResearchQuery,
+  SnapshotCounts,
+  SnapshotHeadline,
+  SnapshotIdentity,
+} from "@personbrief/shared/domain";
+
+export type { IdentityResolution, JobUsageSummary, ResearchLimits, ResearchQuery, SnapshotCounts, SnapshotHeadline, SnapshotIdentity };
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -151,15 +161,6 @@ export const authRateLimits = pgTable("auth_rate_limits", {
 /* Owner settings                                                             */
 /* -------------------------------------------------------------------------- */
 
-export type ResearchLimits = {
-  maxSearchQueries?: number;
-  maxResultsPerQuery?: number;
-  maxExtractPages?: number;
-  maxModelCalls?: number;
-  includeNews?: boolean;
-  newsWindowMonths?: number;
-};
-
 export const ownerSettings = pgTable("owner_settings", {
   userId: text("user_id")
     .primaryKey()
@@ -176,13 +177,6 @@ export const ownerSettings = pgTable("owner_settings", {
 /* Research jobs (durable, lease-based execution)                            */
 /* -------------------------------------------------------------------------- */
 
-export type ResearchQuery = {
-  fullName: string;
-  company: string | null;
-  country: string | null;
-  profileUrl: string | null;
-};
-
 export type JobConfig = {
   limits: Required<Omit<ResearchLimits, "includeNews" | "newsWindowMonths">> & {
     includeNews: boolean;
@@ -198,25 +192,6 @@ export type JobConfig = {
   autoSelect?: boolean;
   /** Refresh runs fetch fresh search results instead of cached ones. */
   bypassSearchCache?: boolean;
-};
-
-export type IdentityResolution = {
-  method: IdentityResolutionMethod;
-  /** English explanation (kept for exports and older snapshots). */
-  reason: string;
-  /** Values for the translated explanation (Identity.methods.*). */
-  params?: { company?: string; domains?: number };
-  decidedAt: string;
-};
-
-export type JobUsageSummary = {
-  searchRequests: number;
-  extractRequests: number;
-  modelCalls: number;
-  inputTokens: number;
-  outputTokens: number;
-  credits: number;
-  estimatedCostUsd: number;
 };
 
 export const researchJobs = pgTable(
@@ -414,36 +389,6 @@ export const profiles = pgTable(
     index("profiles_owner_updated_idx").on(t.ownerId, t.workspace, t.updatedAt),
   ],
 );
-
-export type SnapshotHeadline = {
-  role: string | null;
-  roleClaimId: string | null;
-  organisation: string | null;
-  organisationClaimId: string | null;
-  location: string | null;
-  locationClaimId: string | null;
-};
-
-export type SnapshotIdentity = {
-  displayName: string;
-  nativeName: string | null;
-  nameVariants: string[];
-  organisation: string | null;
-  role: string | null;
-  anchorKey: string;
-  anchorUrls: string[];
-  resolution: IdentityResolution;
-};
-
-export type SnapshotCounts = {
-  sources: number;
-  claims: number;
-  media: number;
-  stories: number;
-  contacts: number;
-  accounts: number;
-  relationships: number;
-};
 
 export type SnapshotDiagnostics = {
   rejected: { kind: string; reason: string; sourceKey: string | null; preview: string }[];
@@ -916,3 +861,66 @@ export const workerHeartbeats = pgTable("worker_heartbeats", {
   activeJobs: integer("active_jobs").notNull().default(0),
   version: text("version"),
 });
+
+/* -------------------------------------------------------------------------- */
+/* Research-completion notifications (mobile app, opt-in)                     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * A phone that asked to be told when research finishes. Bound to the signed-in
+ * session: signing out, revoking the session or its expiry removes it, so a
+ * device never receives another account's notifications.
+ */
+export const pushDevices = pgTable(
+  "push_devices",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    sessionId: text("session_id")
+      .notNull()
+      .references(() => sessions.id, { onDelete: "cascade" }),
+    /** Expo push token; one row per token. */
+    pushToken: text("push_token").notNull(),
+    platform: text("platform").$type<"ios" | "android">().notNull(),
+    appVersion: text("app_version"),
+    lastDeliveryAt: timestamp("last_delivery_at", { withTimezone: true }),
+    lastDeliveryStatus: text("last_delivery_status").$type<"sent" | "failed">(),
+    /** Push service error code of the last failed delivery (e.g. "InvalidCredentials"). */
+    lastDeliveryError: text("last_delivery_error"),
+    ...timestamps,
+  },
+  (t) => [
+    uniqueIndex("push_devices_token_idx").on(t.pushToken),
+    uniqueIndex("push_devices_session_idx").on(t.sessionId),
+    index("push_devices_owner_idx").on(t.ownerId),
+  ],
+);
+
+export type PushTicket = { deviceId: string; ticketId: string | null; error: string | null };
+
+/**
+ * One notification per research run and event. The unique index makes
+ * delivery idempotent across workers and restarts.
+ */
+export const pushDeliveries = pgTable(
+  "push_deliveries",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    jobId: uuid("job_id")
+      .notNull()
+      .references(() => researchJobs.id, { onDelete: "cascade" }),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** "finished": completed, partial or failed; "needs_choice": waiting for the identity choice. */
+    event: text("event").$type<"finished" | "needs_choice">().notNull(),
+    status: text("status").$type<"sending" | "sent" | "failed" | "skipped">().notNull().default("sending"),
+    attempts: integer("attempts").notNull().default(0),
+    tickets: jsonb("tickets").$type<PushTicket[]>().notNull().default([]),
+    receiptsCheckedAt: timestamp("receipts_checked_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (t) => [uniqueIndex("push_deliveries_job_event_idx").on(t.jobId, t.event), index("push_deliveries_receipts_idx").on(t.status, t.receiptsCheckedAt)],
+);

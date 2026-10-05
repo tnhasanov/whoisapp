@@ -5,6 +5,7 @@ import type { Database } from "@/lib/db/client";
 import { appRateLimits, users, workerHeartbeats } from "@/lib/db/schema";
 import type { Env } from "@/lib/env";
 import { claimNextJob, heartbeat, releaseLease, sweepStaleJobs, type JobRow } from "@/lib/jobs/store";
+import { checkPushReceipts, dispatchPushNotifications } from "@/lib/push/dispatch";
 import { purgeExpiredCache } from "@/lib/research/cache";
 import { purgeExpiredDocumentContent } from "@/lib/research/pipeline/documents";
 import { runJob, type RunOutcome } from "@/lib/research/pipeline/run";
@@ -42,6 +43,8 @@ export class ResearchWorker {
   private lastSweep = 0;
   private lastHousekeeping = 0;
   private lastPresence = 0;
+  private lastPush = 0;
+  private lastReceipts = 0;
   private readonly startedAt = new Date();
 
   constructor(options: WorkerOptions) {
@@ -186,6 +189,19 @@ export class ResearchWorker {
     if (now - this.lastHousekeeping > 10 * 60_000) {
       this.lastHousekeeping = now;
       await runHousekeeping(this.db, this.env, this.log);
+    }
+    if (this.env.PUSH_NOTIFICATIONS_ENABLED && now - this.lastPush > 5_000) {
+      this.lastPush = now;
+      // Notification problems must never stop research.
+      await dispatchPushNotifications(this.db, this.env, { log: this.log }).catch((error) =>
+        this.log("push dispatch failed", { error: error instanceof Error ? error.message : String(error) }),
+      );
+      if (now - this.lastReceipts > 5 * 60_000) {
+        this.lastReceipts = now;
+        await checkPushReceipts(this.db, this.env).catch((error) =>
+          this.log("push receipts failed", { error: error instanceof Error ? error.message : String(error) }),
+        );
+      }
     }
   }
 }

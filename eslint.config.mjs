@@ -24,6 +24,8 @@ const eslintConfig = defineConfig([
     "playwright-report/**",
     "dist/**",
     "test-results/**",
+    // The Expo app has its own lint configuration (apps/mobile/eslint.config.js).
+    "apps/**",
   ]),
 ]);
 

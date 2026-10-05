@@ -32,6 +32,7 @@ COPY --from=build --chown=personbrief:personbrief /app/scripts ./scripts
 COPY --from=build --chown=personbrief:personbrief /app/dist ./dist
 # Source is kept for the command-line scripts (migrations, owner creation), which run with tsx.
 COPY --from=build --chown=personbrief:personbrief /app/src ./src
+COPY --from=build --chown=personbrief:personbrief /app/packages ./packages
 USER personbrief
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \

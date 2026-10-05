@@ -27,6 +27,7 @@ import { cacheKey } from "@/lib/research/cache";
 import { normaliseForMatch } from "@/lib/research/text";
 import { canonicaliseUrl } from "@/lib/urls/canonical";
 import { validateProfileUrl } from "@/lib/urls/safe-url";
+import { SearchInputSchema, type SearchInput } from "@personbrief/shared/research/search-input";
 
 /**
  * Research commands used by server actions. Every function takes the
@@ -53,29 +54,7 @@ export class ResearchCommandError extends Error {
   }
 }
 
-/** Field errors are message codes; the UI translates them (Errors.fields.*). */
-const optionalText = (max: number) =>
-  z
-    .string()
-    .trim()
-    .max(max, "too_long")
-    .optional()
-    .nullable()
-    .transform((v) => (v ? v : null));
-
-export const SearchInputSchema = z.object({
-  fullName: z
-    .string({ error: "name_required" })
-    .trim()
-    .min(2, "name_required")
-    .max(120, "too_long")
-    .refine((v) => /\p{L}/u.test(v), "name_required"),
-  company: optionalText(120),
-  country: optionalText(60),
-  profileUrl: optionalText(2048),
-});
-
-export type SearchInput = z.input<typeof SearchInputSchema>;
+export { SearchInputSchema, type SearchInput };
 
 export function parseSearchInput(raw: SearchInput): ResearchQuery {
   const parsed = SearchInputSchema.safeParse(raw);

@@ -1,4 +1,3 @@
-import { and, eq } from "drizzle-orm";
 import { ArrowLeft, ArrowRight, CircleCheck, GitCompareArrows } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -11,11 +10,9 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/feedback";
 import { requireViewer } from "@/lib/auth/session";
 import { formatPartialDate, formatPartialDateString } from "@/lib/dates/partial-date";
-import { loadSnapshotData } from "@/lib/data/profiles";
+import { getProfileChanges } from "@/lib/data/changes";
 import { getDb } from "@/lib/db/client";
-import { profiles, snapshots } from "@/lib/db/schema";
-import { diffSnapshots, type DiffClaim, type DiffMedia, type DiffSide } from "@/lib/diff/snapshot-diff";
-import { desc } from "drizzle-orm";
+import type { DiffClaim, DiffMedia } from "@/lib/diff/snapshot-diff";
 import { getDateFormat } from "@/lib/i18n/date-format-server";
 
 export async function generateMetadata() {
@@ -24,20 +21,6 @@ export async function generateMetadata() {
 export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ profileId: string }>; searchParams: Promise<{ from?: string; to?: string }> };
-
-async function side(ownerId: string, snapshot: typeof snapshots.$inferSelect): Promise<DiffSide> {
-  const data = await loadSnapshotData(getDb(), ownerId, snapshot.id);
-  return {
-    version: snapshot.version,
-    researchedAt: snapshot.researchedAt.toISOString(),
-    claims: data.claims.map((c) => ({ id: c.id, claimKey: c.claimKey, category: c.category, displayValue: c.displayValue, evidenceStatus: c.evidenceStatus, conflictGroup: c.conflictGroup, temporal: c.temporal })),
-    media: data.stories.flatMap((s) => s.items).map((i) => ({ id: i.id, canonicalUrl: i.canonicalUrl, headline: i.headline, outlet: i.outlet, publishedAt: i.publishedAt, coverageType: i.coverageType })),
-    contacts: data.contacts.map((c) => ({ id: c.id, contactKey: c.contactKey, contactType: c.contactType, value: c.value })),
-    accounts: data.accounts.map((a) => ({ id: a.id, accountKey: a.accountKey, platform: a.platform, url: a.url, status: a.status })),
-    relationships: data.relationships.map((r) => ({ id: r.id, relationshipKey: r.relationshipKey, label: r.label, counterpartName: r.counterpartName, kind: r.kind })),
-    headline: { role: snapshot.headline.role, organisation: snapshot.headline.organisation, location: snapshot.headline.location },
-  };
-}
 
 function Section({ title, hint, count, children }: { title: string; hint?: string; count: number; children: ReactNode }) {
   if (count === 0) return null;
@@ -59,10 +42,9 @@ export default async function ChangesPage({ params, searchParams }: Props) {
   const { profileId } = await params;
   const sp = await searchParams;
   if (!/^[0-9a-f-]{36}$/i.test(profileId)) notFound();
-  const db = getDb();
-  const [profile] = await db.select().from(profiles).where(and(eq(profiles.id, profileId), eq(profiles.ownerId, viewer.userId)));
-  if (!profile) notFound();
-  const all = await db.select().from(snapshots).where(and(eq(snapshots.profileId, profile.id), eq(snapshots.ownerId, viewer.userId))).orderBy(desc(snapshots.version));
+  const changes = await getProfileChanges(getDb(), viewer.userId, profileId, sp.from, sp.to);
+  if (!changes) notFound();
+  const { profile, snapshots: all } = changes;
   const t = await getTranslations("Changes");
   const locale = await getLocale();
   const fmtDate = await getDateFormat();
@@ -72,7 +54,7 @@ export default async function ChangesPage({ params, searchParams }: Props) {
       {profile.displayName}
     </Link>
   );
-  if (all.length < 2) {
+  if (!changes.diff) {
     return (
       <PageContainer>
         {back}
@@ -83,9 +65,9 @@ export default async function ChangesPage({ params, searchParams }: Props) {
       </PageContainer>
     );
   }
-  const to = all.find((s) => s.id === sp.to) ?? all[0];
-  const from = all.find((s) => s.id === sp.from && s.version < to.version) ?? all.find((s) => s.version < to.version) ?? all[1];
-  const diff = diffSnapshots(await side(viewer.userId, from), await side(viewer.userId, to));
+  const from = changes.from!;
+  const to = changes.to!;
+  const diff = changes.diff!;
   const dt = (iso: string) => fmtDate(iso, "dateTime");
   const mediaRow = (m: DiffMedia) => (
     <li key={m.id} className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3">

@@ -960,5 +960,15 @@
     "hintBody": "Install it for a full-screen experience from your home screen.",
     "hintIos": "Tap Share, then “Add to Home Screen”.",
     "dismiss": "Dismiss"
+  },
+  "Push": {
+    "completedTitle": "Research finished",
+    "completedBody": "A brief is ready to review.",
+    "partialTitle": "Research finished with partial results",
+    "partialBody": "Open PersonBrief to review what was found.",
+    "failedTitle": "Research could not finish",
+    "failedBody": "Open PersonBrief to retry.",
+    "needsChoiceTitle": "Research needs your choice",
+    "needsChoiceBody": "Several people match. Choose who to research."
   }
 }
