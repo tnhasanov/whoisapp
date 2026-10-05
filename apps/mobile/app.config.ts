@@ -57,11 +57,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       bundleIdentifier: variant.id,
       // iPhone only for the first release (no iPad layouts or screenshots yet).
       supportsTablet: false,
+      // Only the standard HTTPS/TLS of the system networking stack is used.
       config: { usesNonExemptEncryption: false },
-      infoPlist: {
-        // Only the standard HTTPS/TLS of the system networking stack is used.
-        ITSAppUsesNonExemptEncryption: false,
-      },
     },
     android: {
       package: variant.id,

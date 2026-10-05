@@ -1,0 +1,15 @@
+# Offline: what is open stays readable, new research is refused and never
+# queued. Android only (Maestro cannot toggle airplane mode on iOS).
+appId: ${APP_ID}
+env:
+  APP_ID: com.tnhasanov.personbrief.preview
+---
+- runFlow: subflows/ensure-signed-in.yaml
+- setAirplaneMode: enabled
+- extendedWaitUntil:
+    visible: ".*searches are never queued offline.*"
+    timeout: 20000
+- setAirplaneMode: disabled
+- extendedWaitUntil:
+    notVisible: ".*searches are never queued offline.*"
+    timeout: 30000

@@ -1,0 +1,30 @@
+# Research keeps running on the server while the app is in the background;
+# on return the app shows the current state without starting anything again.
+appId: ${APP_ID}
+env:
+  APP_ID: com.tnhasanov.personbrief.preview
+---
+- runFlow: subflows/ensure-signed-in.yaml
+- runFlow: subflows/demo-workspace.yaml
+- scrollUntilVisible:
+    element: "Sparse record · .*"
+- tapOn: "Sparse record · .*"
+- scrollUntilVisible:
+    element:
+      id: "start-research"
+    direction: UP
+- tapOn:
+    id: "start-research"
+- extendedWaitUntil:
+    visible: "Researching Sevinj Abbasli|Research complete"
+    timeout: 30000
+- pressKey: Home
+- launchApp
+- extendedWaitUntil:
+    visible: "Research complete"
+    timeout: 120000
+# Exactly one run was started for this person.
+- back
+- tapOn:
+    id: "tab-activity"
+- assertVisible: "Sevinj Abbasli"

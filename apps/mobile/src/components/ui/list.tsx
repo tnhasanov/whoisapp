@@ -159,6 +159,8 @@ const styles = StyleSheet.create({
   left: { width: 28, alignItems: "center" },
   detail: { maxWidth: "40%" },
   segmented: { flexDirection: "row", borderRadius: RADIUS.md, padding: 3, gap: 3 },
-  segment: { flex: 1, minHeight: 40, alignItems: "center", justifyContent: "center", borderRadius: RADIUS.sm, paddingHorizontal: 6, borderWidth: StyleSheet.hairlineWidth, borderColor: "transparent" },
+  // Widths follow the labels (like iOS's apportionsSegmentWidthsByContent), so
+  // long names such as "Azərbaycanca" stay on one line next to short ones.
+  segment: { flexGrow: 1, flexShrink: 1, flexBasis: "auto", minHeight: 40, alignItems: "center", justifyContent: "center", borderRadius: RADIUS.sm, paddingHorizontal: 6, borderWidth: StyleSheet.hairlineWidth, borderColor: "transparent" },
   chip: { flexDirection: "row", alignItems: "center", gap: 6, minHeight: 36, paddingHorizontal: 14, borderRadius: RADIUS.pill, borderWidth: 1 },
 });

@@ -1,0 +1,18 @@
+# Sign in, then kill and relaunch: the session comes back from the keychain
+# (SecureStore) without asking for the password again.
+appId: ${APP_ID}
+env:
+  APP_ID: com.tnhasanov.personbrief.preview
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Open the fictional demo|Sign in"
+- runFlow: subflows/sign-in.yaml
+- stopApp
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "full-name"
+    timeout: 30000
+- assertNotVisible:
+    id: "password"

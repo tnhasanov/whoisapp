@@ -1,0 +1,12 @@
+appId: ${APP_ID}
+---
+- launchApp
+- runFlow:
+    when:
+      visible:
+        id: "email"
+    file: sign-in.yaml
+- extendedWaitUntil:
+    visible:
+      id: "full-name"
+    timeout: 30000

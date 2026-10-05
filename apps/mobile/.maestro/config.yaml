@@ -1,0 +1,15 @@
+# Maestro smoke tests for the PersonBrief phone app (https://maestro.dev).
+# Run against an installed build and a running server; see README.md.
+flows:
+  - "*.yaml"
+executionOrder:
+  continueOnFailure: false
+  flowsOrder:
+    - 01-sign-in-and-restart
+    - 02-research-journey
+    - 03-choose-the-person
+    - 04-background-and-resume
+    - 05-offline
+    - 06-deep-links
+    - 07-languages
+    - 08-sign-out

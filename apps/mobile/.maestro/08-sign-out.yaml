@@ -1,0 +1,22 @@
+# Sign-out revokes the session on the server and removes local data; a
+# relaunch stays signed out.
+appId: ${APP_ID}
+env:
+  APP_ID: com.tnhasanov.personbrief.preview
+---
+- runFlow: subflows/ensure-signed-in.yaml
+- tapOn:
+    id: "tab-settings"
+- scrollUntilVisible:
+    element: "Sign out"
+- tapOn: "Sign out"
+- tapOn:
+    text: "(?i)sign out"
+    below: "Sign out of PersonBrief\\?"
+- extendedWaitUntil:
+    visible: "You are signed out.*"
+    timeout: 15000
+- stopApp
+- launchApp
+- assertVisible:
+    id: "email"

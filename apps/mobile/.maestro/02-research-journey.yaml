@@ -1,0 +1,57 @@
+# Fictional demo journey: example → research → brief → evidence → save →
+# note → PDF share sheet. Uses only invented people and sources.
+appId: ${APP_ID}
+env:
+  APP_ID: com.tnhasanov.personbrief.preview
+---
+- runFlow: subflows/ensure-signed-in.yaml
+- runFlow: subflows/demo-workspace.yaml
+- scrollUntilVisible:
+    element: "Rich profile · .*"
+- tapOn: "Rich profile · .*"
+- scrollUntilVisible:
+    element:
+      id: "start-research"
+    direction: UP
+- tapOn:
+    id: "start-research"
+- extendedWaitUntil:
+    visible: "Research complete"
+    timeout: 120000
+- tapOn: "View the brief"
+- extendedWaitUntil:
+    visible: "Elnara Gasimova"
+    timeout: 15000
+- assertVisible: "Demo · fictional"
+- assertVisible: "Summary"
+# Contacts: a switchboard is labelled as such; fictional numbers cannot be dialled.
+- tapOn: "Contacts & accounts"
+- assertVisible: "Company switchboard"
+- assertVisible: "Not a direct line"
+# A source opens as a sheet that says whether the page is about this person.
+- tapOn: "Sources"
+- tapOn: "S?1: .*"
+- assertVisible: "About the person|Identity unclear|Different person or unrelated"
+- tapOn: "Close"
+# Save, then add a private note.
+- tapOn: "Overview"
+- tapOn: "Save"
+- assertVisible: "Saved"
+- tapOn: "Notes & tags.*"
+- tapOn: "New note"
+- inputText: "Met at the fictional forum (smoke test)."
+- hideKeyboard
+- tapOn: "Add note"
+- assertVisible: "Met at the fictional forum \\(smoke test\\)\\."
+- back
+# The PDF goes to the system share sheet; dismiss it without sending anything.
+- tapOn: "Share"
+- tapOn: "PDF brief"
+- waitForAnimationToEnd:
+    timeout: 15000
+- back
+- assertVisible: "Elnara Gasimova"
+- back
+- tapOn:
+    id: "tab-saved"
+- assertVisible: "Elnara Gasimova"

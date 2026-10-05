@@ -1,0 +1,20 @@
+# Signs in with the owner account when the welcome screen is showing.
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
+- tapOn:
+    id: "email"
+- inputText: ${EMAIL}
+- tapOn:
+    id: "password"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "sign-in"
+- extendedWaitUntil:
+    visible:
+      id: "full-name"
+    timeout: 30000

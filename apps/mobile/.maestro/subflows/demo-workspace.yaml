@@ -1,0 +1,11 @@
+# Switches the owner to the fictional demo workspace (no provider calls, no cost).
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "tab-settings"
+- tapOn: "Demo · fictional"
+- tapOn:
+    id: "tab-search"
+- extendedWaitUntil:
+    visible: "Fictional examples"
+    timeout: 15000

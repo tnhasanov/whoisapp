@@ -326,7 +326,8 @@ function HeaderAction({ label, icon, onPress, disabled, selected, busy }: { labe
       ]}
     >
       {icon}
-      <Text variant="caption" tone="accent" numberOfLines={1}>
+      {/* Two lines for long translations ("Yadda saxlanılıb") instead of truncating. */}
+      <Text variant="caption" tone="accent" align="center" numberOfLines={2}>
         {label}
       </Text>
     </Pressable>

@@ -1,0 +1,17 @@
+# Deep links open inside the signed-in account; items of other accounts (or
+# deleted ones) show "Not available", never data.
+appId: ${APP_ID}
+env:
+  APP_ID: com.tnhasanov.personbrief.preview
+  SCHEME: personbrief-preview
+---
+- runFlow: subflows/ensure-signed-in.yaml
+- openLink: ${SCHEME}://profile/00000000-0000-4000-8000-000000000000
+- extendedWaitUntil:
+    visible: "Not available"
+    timeout: 15000
+- back
+- openLink: ${SCHEME}://research/00000000-0000-4000-8000-000000000000
+- extendedWaitUntil:
+    visible: "Not available"
+    timeout: 15000

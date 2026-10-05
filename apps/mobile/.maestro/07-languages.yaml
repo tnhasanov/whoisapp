@@ -1,0 +1,25 @@
+# Azerbaijani and Russian, then back to English. The choice is saved to the
+# account, so the website follows it too.
+appId: ${APP_ID}
+env:
+  APP_ID: com.tnhasanov.personbrief.preview
+---
+- runFlow: subflows/ensure-signed-in.yaml
+- tapOn:
+    id: "tab-settings"
+- tapOn: "Azərbaycanca"
+- tapOn:
+    id: "tab-search"
+- assertVisible: "Araşdırmaya başlayın"
+- tapOn:
+    id: "tab-settings"
+- tapOn: "Русский"
+- tapOn:
+    id: "tab-search"
+- assertVisible: "Начать исследование"
+- tapOn:
+    id: "tab-settings"
+- tapOn: "English"
+- tapOn:
+    id: "tab-search"
+- assertVisible: "Start research"
