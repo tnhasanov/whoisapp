@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useTranslations } from "use-intl";
+import { AccountSync } from "@/components/account-sync";
 import { AppLockOverlay, PrivacyCover } from "@/components/app-lock-overlay";
 import { LinkRouter } from "@/components/link-router";
 import { SystemScreen } from "@/components/system-screen";
@@ -107,6 +108,7 @@ function RootNavigator({ ready }: { ready: boolean }) {
         </Stack.Protected>
         <Stack.Screen name="+not-found" options={{ title: t("titles.notFound") }} />
       </Stack>
+      {signedIn ? <AccountSync /> : null}
       <LinkRouter signedIn={signedIn} />
       <AppLockOverlay />
       <PrivacyCover />

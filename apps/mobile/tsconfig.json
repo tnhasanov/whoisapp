@@ -16,7 +16,11 @@
       "zod": [
         "./node_modules/zod"
       ]
-    }
+    },
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "include": [
     "**/*.ts",

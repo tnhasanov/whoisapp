@@ -11,6 +11,16 @@ module.exports = defineConfig([
     },
   },
   {
+    // Node-run tooling configuration.
+    files: ["jest.config.js"],
+    languageOptions: { globals: { __dirname: "readonly", require: "readonly", module: "writable" } },
+  },
+  {
+    // Jest mock factories must use require() and run before imports are evaluated.
+    files: ["src/**/__tests__/**", "test/**"],
+    rules: { "@typescript-eslint/no-require-imports": "off", "import/first": "off" },
+  },
+  {
     ignores: ["dist-web/*", ".bundle-check/*", ".expo/*", "node_modules/*", "coverage/*"],
   },
 ]);
